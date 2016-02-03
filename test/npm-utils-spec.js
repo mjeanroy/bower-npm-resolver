@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-var npm = require('npm');
 var npmUtil = require('../src/npm-utils');
 
 describe('npm-utils', function() {
@@ -35,7 +34,7 @@ describe('npm-utils', function() {
         expect(config).toEqual({
           'proxy': jasmine.anything(),
           'https-proxy': jasmine.anything()
-        })
+        });
       })
       .catch(function() {
         jasmine.fail('Unable to get tarball URL');

@@ -29,7 +29,6 @@ var download = require('../src/download');
 var extract = require('../src/extract');
 
 describe('resolver', function() {
-
   var resolver;
 
   beforeEach(function() {
@@ -57,8 +56,8 @@ describe('resolver', function() {
 
     var success = jasmine.createSpy('success').and.callFake(function(data) {
       expect(data).toEqual([
-        { target: '1.0.0', version: '1.0.0' },
-        { target: '2.0.0', version: '2.0.0' }
+        {target: '1.0.0', version: '1.0.0'},
+        {target: '2.0.0', version: '2.0.0'}
       ]);
 
       done();
@@ -116,8 +115,15 @@ describe('resolver', function() {
 
     // Check final result.
     result.then(function(result) {
-      expect(download.fetch).toHaveBeenCalledWith('http://registry.npmjs.org/bower/-/bower-1.7.7.tgz', jasmine.any(String));
-      expect(extract.tgz).toHaveBeenCalledWith('/tmp/bower.tgz', jasmine.any(String));
+      expect(download.fetch).toHaveBeenCalledWith(
+        'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz',
+        jasmine.any(String)
+      );
+
+      expect(extract.tgz).toHaveBeenCalledWith(
+        '/tmp/bower.tgz',
+        jasmine.any(String)
+      );
 
       expect(result).toBeDefined();
       expect(result).toEqual({

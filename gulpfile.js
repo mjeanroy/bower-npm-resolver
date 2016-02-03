@@ -30,15 +30,25 @@ var bump = require('gulp-bump');
 var gutil = require('gulp-util');
 var git = require('gulp-git');
 var runSequence = require('run-sequence');
+var eslint = require('gulp-eslint');
+
+gulp.task('lint', function() {
+  var srcFiles = path.join(__dirname, 'src/**/*.js');
+  var testFiles = path.join(__dirname, 'test/**/*.js');
+  return gulp.src([srcFiles, testFiles])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
+});
 
 gulp.task('test', function() {
   return gulp.src(path.join(__dirname, 'test/*.js'))
     .pipe(jasmine());
 });
 
-gulp.task('bump', ['bump:patch'], function () {
+gulp.task('bump', ['bump:patch'], function() {
   return gulp.src(path.join(__dirname, 'package.json'))
-    .pipe(bump({type: "patch"}).on('error', gutil.log))
+    .pipe(bump({type: 'patch'}).on('error', gutil.log))
     .pipe(gulp.dest('./'));
 });
 
@@ -48,16 +58,16 @@ gulp.task('commit', function() {
     .pipe(git.commit('release: bumped version number'));
 });
 
-gulp.task('tag', function (done) {
+gulp.task('tag', function(done) {
   var pkg = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8');
-  var version = JSON.parse(pkg).version
+  var version = JSON.parse(pkg).version;
   git.tag('v' + version, 'release: tag version ' + version, done);
 });
 
 ['major', 'minor', 'patch'].forEach(function(level) {
   gulp.task('bump:' + level, function() {
     return gulp.src(path.join(__dirname, 'package.json'))
-      .pipe(bump({ type: level })
+      .pipe(bump({type: level})
       .on('error', gutil.log))
       .pipe(gulp.dest('.'));
   });

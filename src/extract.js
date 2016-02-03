@@ -35,7 +35,7 @@ var zlib = require('zlib');
 var tar = require('tar-fs');
 var Q = require('q');
 
-var isSymlink = function (file) {
+var isSymlink = function(file) {
   return file.type === 'SymbolicLink';
 };
 
@@ -60,7 +60,7 @@ module.exports = {
       .on('error', deferred.reject)
       .pipe(zlib.createGunzip())
       .on('error', deferred.reject)
-      .pipe(tar.extract(dst, { ignore: isSymlink, dmode: 0555, fmode: 0444 }))
+      .pipe(tar.extract(dst, {ignore: isSymlink, dmode: '0555', fmode: '0444'}))
       .on('error', deferred.reject)
       .on('finish', deferred.resolve.bind(deferred, dst));
 

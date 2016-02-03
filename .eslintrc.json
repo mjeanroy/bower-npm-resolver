@@ -1,0 +1,6 @@
+{
+    "extends": "google",
+    "env": {
+      "node": true
+    }
+}

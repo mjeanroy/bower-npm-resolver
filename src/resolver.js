@@ -22,17 +22,18 @@
  * SOFTWARE.
  */
 
+ /**
+  * Factory function for the resolver.
+  * Will be called only one time by Bower, to instantiate resolver.
+  */
+
 var tmp = require('tmp');
 var path = require('path');
 var npmUtils = require('./npm-utils');
 var download = require('./download');
 var extract = require('./extract');
 
-/**
- * Factory function for the resolver.
- * Will be called only one time by Bower, to instantiate resolver.
- */
-module.exports = function resolver(bower) {
+module.exports = function resolver() {
   // Extract the package identifier.
   var extractPackageName = function(source) {
     var parts = source.split('=');
@@ -42,16 +43,25 @@ module.exports = function resolver(bower) {
   // Resolver factory returns an instance of resolver
   return {
 
-    // Match method tells whether resolver supports given source
-    // It can return either boolean or promise of boolean
-    match: function (source) {
+    /**
+     * Match method tells whether resolver supports given source.
+     *
+     * @param {string} source Source from `bower.json`.
+     * @return {boolean} `true` if source match this resolver, `false` otherwise.
+     */
+    match: function(source) {
       return source.indexOf('npm+') === 0;
     },
 
-    // List available versions of given package.
-    // The list of version is automatically fetched from NPM.
-    // Bower chooses matching release and passes it to "fetch".
-    releases: function (source) {
+    /**
+     * List available versions of given package.
+     * The list of version is automatically fetched from NPM.
+     * Bower chooses matching release and passes it to "fetch".
+     *
+     * @param {string} source Source from `bower.json`.
+     * @return {Promise} Promise resolved with available releases versions.
+     */
+    releases: function(source) {
       var pkg = extractPackageName(source);
       return npmUtils.releases(pkg).then(function(versions) {
         return versions.map(function(v) {
@@ -63,12 +73,32 @@ module.exports = function resolver(bower) {
       });
     },
 
-    // Downloads package and extracts it to temporary directory.
-    // If an error occurred, the temporary directory will be deleted.
-    fetch: function (endpoint, cached) {
+    /**
+     * Downloads package and extracts it to temporary directory.
+     * If an error occurred, the temporary directory will be deleted.
+     *
+     * The endpoint parameter is an object, containing following keys:
+     * - `name`: the name of resource (like jquery).
+     * - `source`: Where to download resource.
+     * - `target`: the version or release of resource to download (like v1.0.0).
+     *
+     * The `cached` paramter contains information about cached resource. It
+     * contains following keys:
+     * - `endpoint`: endpoint of cached resource (the same format as above).
+     * - `release`: release of cached resource.
+     * - `releases`: the result of releases method.
+     * - `version`: present cached resource has been resolved as version (like 1.0.0).
+     * - `resolution`: the “resolution” returned from previous fetch call for same resource.
+     *
+     * @param {object} endpoint Endpoint source.
+     * @param {object} cached The cached object (describe above).
+     * @return {Promise} Promise object.
+     * @see http://bower.io/docs/pluggable-resolvers/#resolverfetch
+     */
+    fetch: function(endpoint, cached) {
       // If cached version of package exists, re-use it
       if (cached && cached.version) {
-        return;
+        return undefined;
       }
 
       var pkg = extractPackageName(endpoint.source);
@@ -105,7 +135,7 @@ module.exports = function resolver(bower) {
 
         // When an error occured, remove temporary directory.
         .catch(function() {
-          tmpDir.removeCallback();
+          tmpPackage.removeCallback();
         })
 
         // Always remove the temporary directory for the tgz file.
@@ -114,4 +144,4 @@ module.exports = function resolver(bower) {
         });
     }
   };
-}
+};

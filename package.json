@@ -4,6 +4,7 @@
   "description": "Use npm as a registry for your Bower Dependencies",
   "main": "src/resolver.js",
   "scripts": {
+    "lint": "gulp lint",
     "test": "gulp test",
     "release": "gulp release",
     "release:patch": "gulp release:patch",
@@ -33,14 +34,16 @@
     "request": "2.69.0",
     "tar-fs": "1.9.0"
   },
-
   "devDependencies": {
+    "eslint": "1.10.3",
+    "eslint-config-google": "^0.3.0",
     "gulp": "3.9.0",
-    "gulp-jasmine": "2.2.1",
-    "jasmine-core": "2.4.1",
     "gulp-bump": "1.0.0",
-    "gulp-util": "3.0.7",
+    "gulp-eslint": "1.1.1",
     "gulp-git": "1.7.0",
+    "gulp-jasmine": "2.2.1",
+    "gulp-util": "3.0.7",
+    "jasmine-core": "2.4.1",
     "run-sequence": "1.1.5"
   }
 }

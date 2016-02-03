@@ -76,7 +76,9 @@ module.exports = {
         };
 
         // Add NPM proxy settings.
-        options.proxy = uri.protocol === 'http:' ? config.proxy : config['https-proxy'];
+        options.proxy = uri.protocol === 'http:' ?
+          config.proxy :
+          config['https-proxy'];
 
         var readStream = request(options);
 
@@ -84,10 +86,12 @@ module.exports = {
           .on('response', function(res) {
             var statusCode = res.statusCode;
             if (statusCode >= 400) {
-              return deferred.reject('Unable to download the tarball at ' + targetUrl);
+              return deferred.reject(
+                'Unable to download the tarball at ' + targetUrl
+              );
             }
           })
-          .on('error', function(err){
+          .on('error', function(err) {
             deferred.reject(err);
           });
 
@@ -95,7 +99,7 @@ module.exports = {
         readStream.pipe(writeStream);
 
         writeStream
-          .on('close', function(){
+          .on('close', function() {
             deferred.resolve(tmpFile);
           })
           .on('error', function(err) {

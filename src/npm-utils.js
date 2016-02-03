@@ -56,20 +56,6 @@ var execViewCommand = function(args) {
   return deferred.promise;
 };
 
-var findProxy = function(configList) {
-  for (var i = 0, size = configList.length; i < size; ++i) {
-    var current = configList[i];
-    if (current['proxy'] || current['https-proxy']) {
-      return {
-        'proxy': current['proxy'],
-        'https-proxy': current['https-proxy']
-      }
-    }
-  }
-
-  return {};
-};
-
 var getLastKey = function(o) {
   var keys = Object.keys(o);
   keys.sort();
@@ -88,7 +74,7 @@ module.exports = {
    *  { 'proxy': 'http://proxy:8080', 'https-proxy': 'https://proxy:8080' }
    * ```
    *
-   * @returns {Promise} The promise.
+   * @return {Promise} The promise.
    */
   proxy: function() {
     var deferred = Q.defer();
@@ -119,7 +105,7 @@ module.exports = {
    * The promise will be resolved with the array of versions (i.e `['1.0.0', '1.1.0' ]`).
    *
    * @param {String} pkg The package name.
-   * @returns {Promise} The promise object.
+   * @return {Promise} The promise object.
    */
   releases: function(pkg) {
     return execViewCommand([pkg, 'versions']).then(function(data) {
@@ -149,18 +135,19 @@ module.exports = {
    *
    * @param {String} pkg The package name.
    * @param {String} version The package version.
-   * @returns {Promise} The promise object.
+   * @return {Promise} The promise object.
    */
   tarball: function(pkg, version) {
-    return execViewCommand([pkg + '@' + version, 'dist.tarball']).then(function(data) {
-      // If object contains the tarball URL, return it.
-      if (data['dist.tarball']) {
-        return data['dist.tarball'];
-      }
+    return execViewCommand([pkg + '@' + version, 'dist.tarball'])
+      .then(function(data) {
+        // If object contains the tarball URL, return it.
+        if (data['dist.tarball']) {
+          return data['dist.tarball'];
+        }
 
-      // Otherwise, unwrap it.
-      var mostRecentVersion = getLastKey(data);
-      return data[mostRecentVersion]['dist.tarball'];
-    });
+        // Otherwise, unwrap it.
+        var mostRecentVersion = getLastKey(data);
+        return data[mostRecentVersion]['dist.tarball'];
+      });
   }
 };
