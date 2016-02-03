@@ -37,7 +37,7 @@ Once configured, your bower.json files may reference packages using `npm/` prefi
 ```json
 {
   "dependencies": {
-    "npm/package-name": "1.0.0"
+    "npm+package-name": "1.0.0"
   }
 }
 ```

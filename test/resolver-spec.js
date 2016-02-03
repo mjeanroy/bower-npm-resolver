@@ -39,12 +39,12 @@ describe('resolver', function() {
   });
 
   it('should match npm source', function() {
-    expect(resolver.match('npm/test')).toBe(true);
+    expect(resolver.match('npm+test')).toBe(true);
     expect(resolver.match('test')).toBe(false);
   });
 
   it('should get list of releases', function(done) {
-    var source = 'npm/bower=npm/bower';
+    var source = 'npm+bower=npm+bower';
     var defer = Q.defer();
     var promise = defer.promise;
     spyOn(npmUtils, 'releases').and.returnValue(promise);
@@ -86,7 +86,7 @@ describe('resolver', function() {
     var p3 = d3.promise;
     spyOn(extract, 'tgz').and.returnValue(p3);
 
-    var source = 'npm/bower=npm/bower';
+    var source = 'npm+bower=npm+bower';
     var target = '1.7.7';
 
     var result = resolver.fetch({

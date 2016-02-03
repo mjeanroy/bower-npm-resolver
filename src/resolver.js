@@ -45,7 +45,7 @@ module.exports = function resolver(bower) {
     // Match method tells whether resolver supports given source
     // It can return either boolean or promise of boolean
     match: function (source) {
-      return source.indexOf('npm/') === 0;
+      return source.indexOf('npm+') === 0;
     },
 
     // List available versions of given package.
