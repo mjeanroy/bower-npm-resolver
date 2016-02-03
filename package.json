@@ -1,0 +1,37 @@
+{
+  "name": "bower-npm-resolver",
+  "version": "0.0.0",
+  "description": "Use npm as a registry for your Bower Dependencies",
+  "main": "src/resolver.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mjeanroy/bower-npm-resolver.git"
+  },
+  "keywords": [
+    "bower-resolver"
+  ],
+  "author": {
+    "name": "Mickael Jeanroy",
+    "email": "mickael.jeanroy@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mjeanroy/bower-npm-resolver/issues"
+  },
+  "homepage": "https://github.com/mjeanroy/bower-npm-resolver",
+  "dependencies": {
+    "tmp": "0.0.28",
+    "q": "1.4.1",
+    "request": "2.69.0",
+    "tar-fs": "1.9.0"
+  },
+
+  "devDependencies": {
+    "gulp": "3.9.0",
+    "gulp-jasmine": "2.2.1",
+    "jasmine-core": "2.4.1"
+  }
+}
