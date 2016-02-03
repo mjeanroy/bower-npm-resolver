@@ -51,7 +51,6 @@ describe('npm-utils', function() {
 
     promise
       .then(function(url) {
-        console.log(url);
         expect(url).toBeDefined();
         expect(url).toContains('bower');
         expect(url).toContains('1.7.7');
