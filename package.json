@@ -4,7 +4,11 @@
   "description": "Use npm as a registry for your Bower Dependencies",
   "main": "src/resolver.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test",
+    "release": "gulp release",
+    "release:patch": "gulp release:patch",
+    "release:minor": "gulp release:minor",
+    "release:major": "gulp release:major"
   },
   "repository": {
     "type": "git",
@@ -32,6 +36,10 @@
   "devDependencies": {
     "gulp": "3.9.0",
     "gulp-jasmine": "2.2.1",
-    "jasmine-core": "2.4.1"
+    "jasmine-core": "2.4.1",
+    "gulp-bump": "1.0.0",
+    "gulp-util": "3.0.7",
+    "gulp-git": "1.7.0",
+    "run-sequence": "1.1.5"
   }
 }

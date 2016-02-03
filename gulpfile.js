@@ -22,11 +22,51 @@
  * SOFTWARE.
  */
 
+var fs = require('fs');
 var path = require('path');
 var gulp = require('gulp');
 var jasmine = require('gulp-jasmine');
+var bump = require('gulp-bump');
+var gutil = require('gulp-util');
+var git = require('gulp-git');
+var runSequence = require('run-sequence');
 
 gulp.task('test', function() {
   return gulp.src(path.join(__dirname, 'test/*.js'))
     .pipe(jasmine());
 });
+
+gulp.task('bump', ['bump:patch'], function () {
+  return gulp.src(path.join(__dirname, 'package.json'))
+    .pipe(bump({type: "patch"}).on('error', gutil.log))
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('commit', function() {
+  return gulp.src('.')
+    .pipe(git.add())
+    .pipe(git.commit('release: bumped version number'));
+});
+
+gulp.task('tag', function (done) {
+  var pkg = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8');
+  var version = JSON.parse(pkg).version
+  git.tag('v' + version, 'release: tag version ' + version, done);
+});
+
+['major', 'minor', 'patch'].forEach(function(level) {
+  gulp.task('bump:' + level, function() {
+    return gulp.src(path.join(__dirname, 'package.json'))
+      .pipe(bump({ type: level })
+      .on('error', gutil.log))
+      .pipe(gulp.dest('.'));
+  });
+
+  gulp.task('release:' + level, function() {
+    runSequence('bump:' + level, 'commit', 'tag');
+  });
+});
+
+// Default release task.
+gulp.task('release', ['release:patch']);
+
