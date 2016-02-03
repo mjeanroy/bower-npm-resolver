@@ -31,10 +31,9 @@ describe('npm-utils', function() {
 
     promise
       .then(function(config) {
-        expect(config).toEqual({
-          'proxy': jasmine.anything(),
-          'https-proxy': jasmine.anything()
-        });
+        var keys = Object.keys(config);
+        keys.sort();
+        expect(keys).toEqual(['https-proxy', 'proxy']);
       })
       .catch(function() {
         jasmine.fail('Unable to get tarball URL');
