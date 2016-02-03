@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/mjeanroy/bower-npm-resolver",
   "dependencies": {
+    "npm": ">=1.0.0",
     "tmp": "0.0.28",
     "q": "1.4.1",
     "request": "2.69.0",
