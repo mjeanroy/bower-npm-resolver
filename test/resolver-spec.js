@@ -27,6 +27,7 @@ var factory = require('../src/resolver');
 var npmUtils = require('../src/npm-utils');
 var download = require('../src/download');
 var extract = require('../src/extract');
+var bowerUtils = require('../src/bower-utils');
 
 describe('resolver', function() {
   var resolver;
@@ -85,6 +86,10 @@ describe('resolver', function() {
     var p3 = d3.promise;
     spyOn(extract, 'tgz').and.returnValue(p3);
 
+    var d4 = Q.defer();
+    var p4 = d3.promise;
+    spyOn(bowerUtils, 'patchConfiguration').and.returnValue(p4);
+
     var source = 'npm+bower=npm+bower';
     var target = '1.7.7';
 
@@ -103,31 +108,34 @@ describe('resolver', function() {
     expect(download.fetch).not.toHaveBeenCalled();
     expect(extract.tgz).not.toHaveBeenCalled();
 
-    d1.resolve('http://registry.npmjs.org/bower/-/bower-1.7.7.tgz');
+    var tarballUrl = 'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz';
+    var tarballPath = '/tmp/bower.tgz';
+    var pkgPath = '/tmp/bower';
+    var bowerPkgPath = pkgPath + '/package';
+
+    d1.resolve(tarballUrl);
 
     p1.then(function() {
-      d2.resolve('/tmp/bower.tgz');
+      d2.resolve(tarballPath);
     });
 
     p2.then(function() {
-      d3.resolve('/tmp/bower');
+      d3.resolve(pkgPath);
+    });
+
+    p3.then(function() {
+      d4.resolve();
     });
 
     // Check final result.
     result.then(function(result) {
-      expect(download.fetch).toHaveBeenCalledWith(
-        'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz',
-        jasmine.any(String)
-      );
-
-      expect(extract.tgz).toHaveBeenCalledWith(
-        '/tmp/bower.tgz',
-        jasmine.any(String)
-      );
+      expect(download.fetch).toHaveBeenCalledWith(tarballUrl, jasmine.any(String));
+      expect(extract.tgz).toHaveBeenCalledWith(tarballPath, jasmine.any(String));
+      expect(bowerUtils.patchConfiguration).toHaveBeenCalledWith(bowerPkgPath);
 
       expect(result).toBeDefined();
       expect(result).toEqual({
-        tempPath: '/tmp/bower/package',
+        tempPath: bowerPkgPath,
         removeIgnores: true
       });
 

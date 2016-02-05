@@ -27,11 +27,13 @@
   * Will be called only one time by Bower, to instantiate resolver.
   */
 
+var fs = require('fs');
 var tmp = require('tmp');
 var path = require('path');
 var npmUtils = require('./npm-utils');
 var download = require('./download');
 var extract = require('./extract');
+var bowerUtils = require('./bower-utils');
 
 module.exports = function resolver() {
   // Extract the package identifier.
@@ -116,21 +118,24 @@ module.exports = function resolver() {
       return npmUtils.tarball(pkg, endpoint.target)
 
         // We have the tarball URL, download it.
-        .then(function(url) {
-          return download.fetch(url, tmpTar.name);
+        .then(function(tarballUrl) {
+          return download.fetch(tarballUrl, tmpTar.name);
         })
 
         // Download ok, extract tarball.
-        .then(function(tarball) {
-          return extract.tgz(tarball, tmpPackage.name);
+        .then(function(tarballPath) {
+          return extract.tgz(tarballPath, tmpPackage.name);
         })
 
-        // Extraction ok, return the path of the downloaded file.
+        // Patch configuration with `package.json` file if `bower.json` does not exist.
         .then(function(dir) {
-          return {
-            tempPath: path.join(dir, 'package'),
-            removeIgnores: true
-          };
+          var pkgPath = path.join(dir, 'package');
+          return bowerUtils.patchConfiguration(pkgPath).then(function() {
+            return {
+              tempPath: pkgPath,
+              removeIgnores: true
+            };
+          });
         })
 
         // When an error occured, remove temporary directory.
