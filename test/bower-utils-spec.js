@@ -42,14 +42,20 @@ describe('bower-utils', function() {
 
   it('should create json file from package json', function(done) {
     var config = {
-      main: 'foo',
+      main: 'bower-npm-resolver',
       description: 'This is a fake module',
-      main: 'foo.js',
+      main: 'src/resolver.js',
       moduleType: ['amd', 'globals', 'node'],
       keywords: ['test'],
       authors: ['mickael.jeanroy@gmail.com'],
       license: 'MIT',
       ignore: ['test'],
+      bugs: 'https://github.com/mjeanroy/bower-npm-resolver/issues',
+      homepage: 'https://github.com/mjeanroy/bower-npm-resolver',
+      repository: {
+        type: 'git',
+        url: 'https://github.com/mjeanroy/bower-npm-resolver.git'
+      },
       private: false
     };
 

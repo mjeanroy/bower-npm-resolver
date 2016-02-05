@@ -70,7 +70,10 @@ module.exports = {
               'authors',
               'license',
               'ignore',
-              'private'
+              'private',
+              'homepage',
+              'bugs',
+              'repository'
             ]);
 
             // Do not try to translate dependencies.
