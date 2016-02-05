@@ -77,7 +77,7 @@ module.exports = {
             ]);
 
             // Do not try to translate dependencies.
-            // TODO Maybe be can try to deduce the dependencies ?
+            // Maybe be can try to deduce the dependencies ?
             newConfig.dependencies = {};
             newConfig.devDependencies = {};
 

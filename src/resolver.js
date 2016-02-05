@@ -27,7 +27,6 @@
   * Will be called only one time by Bower, to instantiate resolver.
   */
 
-var fs = require('fs');
 var tmp = require('tmp');
 var path = require('path');
 var npmUtils = require('./npm-utils');

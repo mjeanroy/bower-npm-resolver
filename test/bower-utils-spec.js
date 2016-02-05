@@ -42,7 +42,7 @@ describe('bower-utils', function() {
 
   it('should create json file from package json', function(done) {
     var config = {
-      main: 'bower-npm-resolver',
+      name: 'bower-npm-resolver',
       description: 'This is a fake module',
       main: 'src/resolver.js',
       moduleType: ['amd', 'globals', 'node'],
@@ -84,7 +84,7 @@ describe('bower-utils', function() {
 
   it('should not create json file if bower.json already exist', function(done) {
     var packageConfig = {
-      main: 'foo',
+      name: 'foo',
       description: 'This is a fake module',
       main: 'foo.js',
       moduleType: ['amd', 'globals', 'node'],
@@ -96,7 +96,7 @@ describe('bower-utils', function() {
     };
 
     var bowerConfig = {
-      main: 'foo',
+      name: 'foo',
       description: 'This is a fake module',
       main: 'foo.js',
       moduleType: ['amd', 'globals', 'node'],
