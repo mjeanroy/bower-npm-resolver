@@ -35,12 +35,29 @@ describe('resolver', function() {
 
   beforeEach(function() {
     resolver = factory({
+      config: {},
       version: '1.7.7'
     });
   });
 
-  it('should match npm source', function() {
+  it('should match npm source by default', function() {
     expect(resolver.match('npm+test')).toBe(true);
+    expect(resolver.match('test')).toBe(false);
+  });
+
+  it('should match custom prefix when passed', function() {
+    resolver = factory({
+      config: {
+        bowerNpmResolver: {
+          matchPrefix: 'mycompany'
+        }
+      },
+      version: '1.7.7'
+    });
+
+    expect(resolver.match('mycompany-test')).toBe(true);
+
+    expect(resolver.match('npm+test')).toBe(false);
     expect(resolver.match('test')).toBe(false);
   });
 
@@ -72,6 +89,25 @@ describe('resolver', function() {
 
     result.then(success, error);
     defer.resolve(['1.0.0', '2.0.0']);
+  });
+
+  it('should not strip prefix from package name if stripPrefix=false', function() {
+    resolver = factory({
+      config: {
+        bowerNpmResolver: {
+          matchPrefix: 'mycompany',
+          stripPrefix: false
+        }
+      },
+      version: '1.7.7'
+    });
+
+    spyOn(npmUtils, 'releases').and.returnValue(Q.when());
+
+    var source = 'mycompany-foobar=mycompany-foobar';
+    resolver.releases(source);
+
+    expect(npmUtils.releases).toHaveBeenCalledWith('mycompany-foobar');
   });
 
   it('should fetch release', function(done) {
