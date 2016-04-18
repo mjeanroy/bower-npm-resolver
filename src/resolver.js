@@ -35,10 +35,12 @@ var extract = require('./extract');
 var bowerUtils = require('./bower-utils');
 
 module.exports = function resolver() {
+  var DEFAULT_PREFIX = 'npm+';
+
   // Extract the package identifier.
   var extractPackageName = function(source) {
     var parts = source.split('=');
-    return parts[0].slice(4);
+    return parts[0].slice(DEFAULT_PREFIX.length);
   };
 
   // Resolver factory returns an instance of resolver
@@ -51,7 +53,7 @@ module.exports = function resolver() {
      * @return {boolean} `true` if source match this resolver, `false` otherwise.
      */
     match: function(source) {
-      return source.indexOf('npm+') === 0;
+      return source.indexOf(DEFAULT_PREFIX) === 0;
     },
 
     /**
