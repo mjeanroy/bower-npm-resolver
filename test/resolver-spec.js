@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+var path = require('path');
 var Q = require('q');
 var factory = require('../src/resolver');
 var npmUtils = require('../src/npm-utils');
@@ -111,7 +112,7 @@ describe('resolver', function() {
     var tarballUrl = 'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz';
     var tarballPath = '/tmp/bower.tgz';
     var pkgPath = '/tmp/bower';
-    var bowerPkgPath = pkgPath + '/package';
+    var bowerPkgPath = path.normalize(pkgPath + '/package');
 
     d1.resolve(tarballUrl);
 
