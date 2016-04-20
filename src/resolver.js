@@ -34,11 +34,25 @@ var download = require('./download');
 var extract = require('./extract');
 var bowerUtils = require('./bower-utils');
 
-module.exports = function resolver() {
+module.exports = function resolver(bower) {
+  var DEFAULT_MATCH_PREFIX = 'npm+';
+  var DEFAULT_STRIP_PREFIX = true;
+
+  // Read configuration passed via .bowerrc
+  var cfg = bower.config.bowerNpmResolver || {};
+  var matchPrefix = cfg.matchPrefix || DEFAULT_MATCH_PREFIX;
+  var stripPrefix = ('stripPrefix' in cfg) ? Boolean(cfg.stripPrefix) : DEFAULT_STRIP_PREFIX;
+
   // Extract the package identifier.
   var extractPackageName = function(source) {
     var parts = source.split('=');
-    return parts[0].slice(4);
+    var pkgName = parts[0];
+
+    if (stripPrefix) {
+      pkgName = pkgName.slice(matchPrefix.length);
+    }
+
+    return pkgName;
   };
 
   // Resolver factory returns an instance of resolver
@@ -46,12 +60,14 @@ module.exports = function resolver() {
 
     /**
      * Match method tells whether resolver supports given source.
+     * By default, the resolver matches entries whose key name in `bower.json` starts with `npm+` string.
+     * This is configurable via `bowerNpmResolver.prefix` property in `.bowerrc`.
      *
      * @param {string} source Source from `bower.json`.
      * @return {boolean} `true` if source match this resolver, `false` otherwise.
      */
     match: function(source) {
-      return source.indexOf('npm+') === 0;
+      return source.indexOf(matchPrefix) === 0;
     },
 
     /**
