@@ -41,28 +41,14 @@ describe('resolver', function() {
   });
 
   it('should match npm source by default', function() {
-    expect(resolver.match('npm+test')).toBe(true);
-    expect(resolver.match('test')).toBe(false);
-  });
-
-  it('should match custom prefix when passed', function() {
-    resolver = factory({
-      config: {
-        bowerNpmResolver: {
-          matchPrefix: 'mycompany'
-        }
-      },
-      version: '1.7.7'
-    });
-
-    expect(resolver.match('mycompany-test')).toBe(true);
-
-    expect(resolver.match('npm+test')).toBe(false);
+    expect(resolver.match('npm://test')).toBe(true);
+    expect(resolver.match('npm://test#~1.0.0')).toBe(true);
+    expect(resolver.match('npm://@scope/test#~1.0.0')).toBe(true);
     expect(resolver.match('test')).toBe(false);
   });
 
   it('should get list of releases', function(done) {
-    var source = 'npm+bower=npm+bower';
+    var source = 'npm://bower';
     var defer = Q.defer();
     var promise = defer.promise;
     spyOn(npmUtils, 'releases').and.returnValue(promise);
@@ -91,25 +77,6 @@ describe('resolver', function() {
     defer.resolve(['1.0.0', '2.0.0']);
   });
 
-  it('should not strip prefix from package name if stripPrefix=false', function() {
-    resolver = factory({
-      config: {
-        bowerNpmResolver: {
-          matchPrefix: 'mycompany',
-          stripPrefix: false
-        }
-      },
-      version: '1.7.7'
-    });
-
-    spyOn(npmUtils, 'releases').and.returnValue(Q.when());
-
-    var source = 'mycompany-foobar=mycompany-foobar';
-    resolver.releases(source);
-
-    expect(npmUtils.releases).toHaveBeenCalledWith('mycompany-foobar');
-  });
-
   it('should fetch release', function(done) {
     var d1 = Q.defer();
     var p1 = d1.promise;
@@ -127,7 +94,7 @@ describe('resolver', function() {
     var p4 = d3.promise;
     spyOn(bowerUtils, 'patchConfiguration').and.returnValue(p4);
 
-    var source = 'npm+bower=npm+bower';
+    var source = 'npm://bower#~1.7.0';
     var target = '1.7.7';
 
     var result = resolver.fetch({

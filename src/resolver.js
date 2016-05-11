@@ -34,25 +34,21 @@ var download = require('./download');
 var extract = require('./extract');
 var bowerUtils = require('./bower-utils');
 
-module.exports = function resolver(bower) {
-  var DEFAULT_MATCH_PREFIX = 'npm+';
-  var DEFAULT_STRIP_PREFIX = true;
+module.exports = function resolver() {
+  var NPM_SCHEME = 'npm://';
 
-  // Read configuration passed via .bowerrc
-  var cfg = bower.config.bowerNpmResolver || {};
-  var matchPrefix = cfg.matchPrefix || DEFAULT_MATCH_PREFIX;
-  var stripPrefix = ('stripPrefix' in cfg) ? Boolean(cfg.stripPrefix) : DEFAULT_STRIP_PREFIX;
-
-  // Extract the package identifier.
-  var extractPackageName = function(source) {
-    var parts = source.split('=');
-    var pkgName = parts[0];
-
-    if (stripPrefix) {
-      pkgName = pkgName.slice(matchPrefix.length);
-    }
-
-    return pkgName;
+  /**
+   * Extract package name from package source.
+   * The source is formatted such as:
+   *    npm://[package]#[version]
+   *
+   * @param {string} source Source read from `bower.json` file.
+   * @return {string} Package name extracted from given source.
+   */
+  var extractPackageName = function (source) {
+    var withoutScheme = source.slice(NPM_SCHEME.length);
+    var withoutVersion = withoutScheme.split('#')[0];
+    return withoutVersion;
   };
 
   // Resolver factory returns an instance of resolver
@@ -60,14 +56,13 @@ module.exports = function resolver(bower) {
 
     /**
      * Match method tells whether resolver supports given source.
-     * By default, the resolver matches entries whose key name in `bower.json` starts with `npm+` string.
-     * This is configurable via `bowerNpmResolver.prefix` property in `.bowerrc`.
+     * The resolver matches entries whose package value in `bower.json` starts with `npm://` string.
      *
      * @param {string} source Source from `bower.json`.
      * @return {boolean} `true` if source match this resolver, `false` otherwise.
      */
     match: function(source) {
-      return source.indexOf(matchPrefix) === 0;
+      return source.indexOf(NPM_SCHEME) === 0;
     },
 
     /**
