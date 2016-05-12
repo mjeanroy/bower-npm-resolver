@@ -86,7 +86,7 @@ function matchersExec(source) {
 
 var NPM_SCHEME_PATTERN = '^npm:/{0,3}(?!/)';
 // var NPM_SCHEME_PATTERN_VALID_ONLY = '^npm:(?:/?|///)(?!\\/)';
-var NPM_PREFIX_PATTERN = '^' + escapeStringRegexp('npm+');
+var NPM_PREFIX = 'npm+';
 
 /**
  * Creates a list of matchers from the config, providing default matchers if necessary
@@ -121,7 +121,7 @@ exports.getFromConfig = function getFromConfig(config) {
       replace: true
     });
     patterns.push({
-      pattern: NPM_PREFIX_PATTERN,
+      prefix: NPM_PREFIX,
       replace: true
     });
   }
@@ -143,7 +143,9 @@ exports.getFromConfig = function getFromConfig(config) {
       throw new Error('Invalid match value: ' + pattern);
     }
 
-    var regexp = pattern.regexp || new RegExp(pattern.pattern, pattern.flags);
+    var patternString = pattern.pattern || (pattern.prefix ? '^' + escapeStringRegexp(pattern.prefix) : null);
+
+    var regexp = pattern.regexp || new RegExp(patternString, pattern.flags);
     var replace;
 
     if (pattern.replace === true) {

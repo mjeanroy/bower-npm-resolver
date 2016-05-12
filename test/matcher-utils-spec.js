@@ -87,6 +87,11 @@ describe('matcher-utils', function() {
         pattern: '^mycompany'
       }
     },
+    'object with prefix': {
+      match: {
+        prefix: 'mycompany'
+      }
+    },
     'object with replace=false': {
       match: {
         pattern: '^mycompany',
@@ -131,7 +136,7 @@ describe('matcher-utils', function() {
   forEachObjectAsMap({
     'replace=true': {
       match: {
-        pattern: '^mycompany-',
+        prefix: 'mycompany-',
         replace: true
       }
     },
