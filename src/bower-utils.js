@@ -77,7 +77,7 @@ module.exports = {
             ]);
 
             // scoped packages get special treatment
-            // See https://github.com/npm/npm/blob/2a5977e0c65b244e92d848fcd56f2f80ba8cdf3b/lib/pack.js#L53
+            // See https://github.com/npm/npm/blob/v3.9.1/lib/pack.js#L53
             if (newConfig.name[0] === '@') {
               newConfig.name = newConfig.name.substr(1).replace(/\//g, '-');
             }
