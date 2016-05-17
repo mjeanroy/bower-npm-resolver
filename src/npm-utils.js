@@ -30,7 +30,9 @@
  */
 
 var Q = require('q');
+var fs = require('fs');
 var npm = require('npm');
+var path = require('path');
 
 var wrapCallback = function(deferred) {
   return function(err, data) {
@@ -50,6 +52,20 @@ var execViewCommand = function(args) {
       deferred.reject(err);
     } else {
       npm.commands.view(args, true, wrapCallback(deferred));
+    }
+  });
+
+  return deferred.promise;
+};
+
+var execPackCommand = function(args) {
+  var deferred = Q.defer();
+
+  npm.load(function(err) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      npm.commands.pack(args, true, wrapCallback(deferred));
     }
   });
 
@@ -148,6 +164,33 @@ module.exports = {
         // Otherwise, unwrap it.
         var mostRecentVersion = getLastKey(data);
         return data[mostRecentVersion]['dist.tarball'];
+      });
+  },
+
+  /**
+   * Download tarball using `npm pack pkg@version`, move to temporary folder and return
+   * the location of the tarball in the temporary folder.
+   *
+   * The promise will be resolved with the tarball
+   * path (i.e. `'/home/user/.cache/bower-1.7.7.tgz'`).
+   *
+   * @param {String} pkg The package name.
+   * @param {String} version The package version.
+   * @param {String} [dir] Tarball download location.
+   * @return {Promise} The promise object.
+   */
+  downloadTarball: function(pkg, version, dir) {
+    return execPackCommand([pkg + '@' + version])
+      .then(function(filename) {
+        filename = filename[0];
+        var newPath = path.resolve(dir, filename);
+
+        if (dir && dir !== process.cwd()) {
+          var oldPath = path.resolve(process.cwd(), filename);
+          fs.renameSync(oldPath, newPath);
+        }
+
+        return newPath;
       });
   }
 };
