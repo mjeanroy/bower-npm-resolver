@@ -33,21 +33,24 @@ var npmUtils = require('./npm-utils');
 var download = require('./download');
 var extract = require('./extract');
 var bowerUtils = require('./bower-utils');
+var matcherUtils = require('./matcher-utils');
 
-module.exports = function resolver() {
-  var NPM_SCHEME = 'npm://';
+module.exports = function resolver(bower) {
+  // Read configuration passed via .bowerrc
+  var matchers = matcherUtils.getFromConfig(bower.config.bowerNpmResolver);
 
   /**
    * Extract package name from package source.
    * The source is formatted such as:
-   *    npm://[package]#[version]
+   *    npm:[package]#[version]
    *
    * @param {string} source Source read from `bower.json` file.
    * @return {string} Package name extracted from given source.
    */
-  var extractPackageName = function (source) {
-    var withoutScheme = source.slice(NPM_SCHEME.length);
-    var withoutVersion = withoutScheme.split('#')[0];
+  var extractPackageName = function(source) {
+    var matchedSource = matchers.exec(source);
+    var withoutVersion = matchedSource.split('#')[0];
+
     return withoutVersion;
   };
 
@@ -56,13 +59,13 @@ module.exports = function resolver() {
 
     /**
      * Match method tells whether resolver supports given source.
-     * The resolver matches entries whose package value in `bower.json` starts with `npm://` string.
+     * The resolver matches entries whose package value in `bower.json` starts with `npm:` string.
      *
      * @param {string} source Source from `bower.json`.
      * @return {boolean} `true` if source match this resolver, `false` otherwise.
      */
     match: function(source) {
-      return source.indexOf(NPM_SCHEME) === 0;
+      return matchers.test(source);
     },
 
     /**

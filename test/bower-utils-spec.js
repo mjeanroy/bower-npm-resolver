@@ -129,4 +129,33 @@ describe('bower-utils', function() {
       done();
     });
   });
+
+  it('should normalize scoped package names', function(done) {
+    var config = {
+      name: '@scope/my-package',
+      description: 'This is a fake scoped package'
+    };
+
+    var normalizedName = 'scope-my-package';
+
+    fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(config, null, 2), 'utf-8');
+
+    var p = bowerUtil.patchConfiguration(tmpDir.name);
+    expect(p).toBeDefined();
+
+    p.then(function() {
+      expect(fs.statSync(path.join(tmpDir.name, 'bower.json')).isFile()).toBe(true);
+
+      var bowerJson = JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'));
+      expect(bowerJson.name).toEqual(normalizedName);
+    });
+
+    p.catch(function() {
+      jasmine.fail();
+    });
+
+    p.finally(function() {
+      done();
+    });
+  });
 });

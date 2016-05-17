@@ -40,15 +40,8 @@ describe('resolver', function() {
     });
   });
 
-  it('should match npm source by default', function() {
-    expect(resolver.match('npm://test')).toBe(true);
-    expect(resolver.match('npm://test#~1.0.0')).toBe(true);
-    expect(resolver.match('npm://@scope/test#~1.0.0')).toBe(true);
-    expect(resolver.match('test')).toBe(false);
-  });
-
   it('should get list of releases', function(done) {
-    var source = 'npm://bower';
+    var source = 'npm:bower';
     var defer = Q.defer();
     var promise = defer.promise;
     spyOn(npmUtils, 'releases').and.returnValue(promise);
@@ -94,7 +87,7 @@ describe('resolver', function() {
     var p4 = d3.promise;
     spyOn(bowerUtils, 'patchConfiguration').and.returnValue(p4);
 
-    var source = 'npm://bower#~1.7.0';
+    var source = 'npm:bower#~1.7.0';
     var target = '1.7.7';
 
     var result = resolver.fetch({
