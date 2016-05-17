@@ -30,7 +30,6 @@
 var tmp = require('tmp');
 var path = require('path');
 var npmUtils = require('./npm-utils');
-var download = require('./download');
 var extract = require('./extract');
 var bowerUtils = require('./bower-utils');
 
