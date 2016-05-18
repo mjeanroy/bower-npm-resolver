@@ -26,7 +26,6 @@ var path = require('path');
 var Q = require('q');
 var factory = require('../src/resolver');
 var npmUtils = require('../src/npm-utils');
-var download = require('../src/download');
 var extract = require('../src/extract');
 var bowerUtils = require('../src/bower-utils');
 
@@ -113,18 +112,14 @@ describe('resolver', function() {
   it('should fetch release', function(done) {
     var d1 = Q.defer();
     var p1 = d1.promise;
-    spyOn(npmUtils, 'tarball').and.returnValue(p1);
-
-    var d2 = Q.defer();
-    var p2 = d2.promise;
-    spyOn(download, 'fetch').and.returnValue(p2);
+    spyOn(npmUtils, 'downloadTarball').and.returnValue(p1);
 
     var d3 = Q.defer();
     var p3 = d3.promise;
     spyOn(extract, 'tgz').and.returnValue(p3);
 
     var d4 = Q.defer();
-    var p4 = d3.promise;
+    var p4 = d4.promise;
     spyOn(bowerUtils, 'patchConfiguration').and.returnValue(p4);
 
     var source = 'npm+bower=npm+bower';
@@ -141,22 +136,16 @@ describe('resolver', function() {
     });
 
     expect(result).toBeDefined();
-    expect(npmUtils.tarball).toHaveBeenCalledWith('bower', '1.7.7');
-    expect(download.fetch).not.toHaveBeenCalled();
+    expect(npmUtils.downloadTarball).toHaveBeenCalledWith('bower', '1.7.7', jasmine.any(String));
     expect(extract.tgz).not.toHaveBeenCalled();
 
-    var tarballUrl = 'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz';
     var tarballPath = '/tmp/bower.tgz';
     var pkgPath = '/tmp/bower';
     var bowerPkgPath = path.normalize(pkgPath + '/package');
 
-    d1.resolve(tarballUrl);
+    d1.resolve(tarballPath);
 
     p1.then(function() {
-      d2.resolve(tarballPath);
-    });
-
-    p2.then(function() {
       d3.resolve(pkgPath);
     });
 
@@ -166,7 +155,6 @@ describe('resolver', function() {
 
     // Check final result.
     result.then(function(result) {
-      expect(download.fetch).toHaveBeenCalledWith(tarballUrl, jasmine.any(String));
       expect(extract.tgz).toHaveBeenCalledWith(tarballPath, jasmine.any(String));
       expect(bowerUtils.patchConfiguration).toHaveBeenCalledWith(bowerPkgPath);
 
