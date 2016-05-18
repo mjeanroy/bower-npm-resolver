@@ -32,19 +32,50 @@ Add the resolver in your `.bowerrc` file:
 }
 ```
 
-Once configured, your bower.json files may reference packages using `npm+` prefix:
+### Usage
+
+Once configured, your bower.json files may reference packages using `npm:` prefix:
 
 ```json
 {
   "dependencies": {
-    "npm+foobar": "1.0.0",
-    "other": "1.0.0"
+    "jquery": "npm:jquery#1.0.0",
+    "lodash": "4.0.0"
   }
 }
 ```
 
-The resolver will match packages with `npm+` prefix, and strip the prefix prior to fetching from npm repo.
-In the example above, `foobar` will be fetched from npm. `other` will not be matched by this resolver.
+The resolver will match packages with `npm:` prefix.
+In the example above, `jquery` will be fetched from npm. `lodash` will not be matched by this resolver.
+
+Note that you can also specify scope package:
+
+```json
+{
+  "dependencies": {
+    "angular-core": "npm:@angular/core#~2.0.0"
+  }
+}
+```
+
+The resolver will download the scope package on npm and extract the tarball in the `bower_components` directory named `[scope]-[name]` (in the example above, scope is `angular`, name is `core`).
+
+### Alternative usage
+
+As of v0.2.0, matching were made using `npm+` prefix, such as:
+
+
+```json
+{
+  "dependencies": {
+    "npm+jquery": "jquery",
+    "lodash": "4.0.0"
+  }
+}
+```
+
+The resolver will match packages with npm+ prefix, and strip the prefix prior to fetching from npm repo.
+In the example above, `jquery` will be fetched from npm, `lodash` will not be matched by this resolver.
 
 If this is not what you want, you can pass configuration parameters in `.bowerrc`.
 
@@ -94,6 +125,16 @@ transitive dependencies (and you will have to explicitly add then to your `bower
 
 MIT License (MIT)
 
+## Changelogs
+
+- 0.3.0
+  - Use `npm:` prefix.
+  - Support scope packages.
+- 0.2.0
+  - Allow custom prefixes (instead of default `npm+`).
+- 0.1.0 - Initial release
+  - Use `npm+` prefix to match packages.
+
 ## Contributing
 
 If you find a bug or think about enhancement, feel free to contribute and submit an issue or a pull request.
@@ -102,3 +143,7 @@ To work in TDD mode:
 
     npm install -g jasmine-node@2
     jasmine-node test --autoTest --watchFolders src
+
+## Credits
+
+Special thanks to @mhofman & @jakub-g for their [contributions](https://github.com/mjeanroy/bower-npm-resolver/pulls?q=is%3Apr+is%3Aclosed)!
