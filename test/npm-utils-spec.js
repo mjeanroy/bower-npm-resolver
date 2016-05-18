@@ -41,4 +41,22 @@ describe('npm-utils', function() {
         done();
       });
   });
+
+  it('should get tarball', function(done) {
+    var promise = npmUtil.downloadTarball('bower', '1.7.7', __dirname);
+    expect(promise).toBeDefined();
+
+    promise
+      .then(function(path) {
+        expect(path.length).toBeGreaterThan(0);
+        expect(path).toContains('bower');
+        expect(path).toContains('1.7.7');
+      })
+      .catch(function() {
+        jasmine.fail('Unable to get tarball URL');
+      })
+      .finally(function() {
+        done();
+      });
+  });
 });
