@@ -123,7 +123,7 @@ module.exports = {
     return execPackCommand([pkg + '@' + version])
       .then(function(filename) {
         filename = filename[0];
-        var newPath = path.resolve(dir, filename);
+        var newPath = path.resolve(dir || process.cwd(), filename);
 
         if (dir && dir !== process.cwd()) {
           var oldPath = path.resolve(process.cwd(), filename);
