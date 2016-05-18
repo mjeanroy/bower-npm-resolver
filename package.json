@@ -1,6 +1,6 @@
 {
   "name": "bower-npm-resolver",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Use npm as a registry for your Bower Dependencies",
   "main": "src/resolver.js",
   "scripts": {
