@@ -25,42 +25,6 @@
 var npmUtil = require('../src/npm-utils');
 
 describe('npm-utils', function() {
-  it('should get the proxy', function(done) {
-    var promise = npmUtil.proxy();
-    expect(promise).toBeDefined();
-
-    promise
-      .then(function(config) {
-        var keys = Object.keys(config);
-        keys.sort();
-        expect(keys).toEqual(['https-proxy', 'proxy']);
-      })
-      .catch(function() {
-        jasmine.fail('Unable to get tarball URL');
-      })
-      .finally(function() {
-        done();
-      });
-  });
-
-  it('should get tarball url', function(done) {
-    var promise = npmUtil.tarball('bower', '1.7.7');
-    expect(promise).toBeDefined();
-
-    promise
-      .then(function(url) {
-        expect(url).toBeDefined();
-        expect(url).toContains('bower');
-        expect(url).toContains('1.7.7');
-      })
-      .catch(function() {
-        jasmine.fail('Unable to get tarball URL');
-      })
-      .finally(function() {
-        done();
-      });
-  });
-
   it('should get list of releases', function(done) {
     var promise = npmUtil.releases('bower', '1.7.7');
     expect(promise).toBeDefined();
