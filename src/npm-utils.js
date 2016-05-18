@@ -58,6 +58,17 @@ var execViewCommand = function(args) {
   return deferred.promise;
 };
 
+/**
+ * Executes `npm pack` command with passed arguments. Arguments is the array of command
+ * line options. So if cmd command was `npm pack bower@1.7.7 jasmine`, then array of
+ * arguments would be ['bower@1.7.7', 'jasmine'].
+ *
+ * The returned promise will be resolved with array of tarball paths relative to process.cwd()
+ * (i.e. ['bower-1.7.7.tgz', 'jasmine-2.4.1.tgz'])
+ *
+ * @param {Array} args Arguments object
+ * @return {Promise} The promise object
+ */
 var execPackCommand = function(args) {
   var deferred = Q.defer();
 
