@@ -120,8 +120,11 @@ module.exports = {
    * @return {Promise} The promise object.
    */
   downloadTarball: function(pkg, version, dir) {
+    var oldCWD = process.cwd();
+    process.chdir(dir);
     return execPackCommand([pkg + '@' + version])
       .then(function(filename) {
+        process.chdir(oldCWD);
         filename = filename[0];
         var newPath = path.resolve(dir || process.cwd(), filename);
 
