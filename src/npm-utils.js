@@ -136,15 +136,7 @@ module.exports = {
     return execPackCommand([pkg + '@' + version])
       .then(function(filename) {
         process.chdir(oldCWD);
-        filename = filename[0];
-        var newPath = path.resolve(dir || process.cwd(), filename);
-
-        if (dir && dir !== process.cwd()) {
-          var oldPath = path.resolve(process.cwd(), filename);
-          fs.renameSync(oldPath, newPath);
-        }
-
-        return newPath;
+        return path.resolve(dir || process.cwd(), filename[0]);
       });
   }
 };
