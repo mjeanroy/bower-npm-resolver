@@ -66,7 +66,7 @@ describe('npm-utils', function() {
         expect(path).toContains('1.7.7');
       })
       .catch(function() {
-        jasmine.fail('Unable to get tarball URL');
+        jasmine.fail('Unable to download the tarball');
       })
       .finally(function() {
         done();
