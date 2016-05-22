@@ -22,9 +22,22 @@
  * SOFTWARE.
  */
 
+var tmp = require('tmp');
 var npmUtil = require('../src/npm-utils');
 
 describe('npm-utils', function() {
+  var tmpDir;
+
+  beforeEach(function() {
+    tmpDir = tmp.dirSync({
+      unsafeCleanup: true
+    });
+  });
+
+  afterEach(function() {
+    tmpDir.removeCallback();
+  });
+
   it('should get list of releases', function(done) {
     var promise = npmUtil.releases('bower', '1.7.7');
     expect(promise).toBeDefined();
@@ -43,7 +56,7 @@ describe('npm-utils', function() {
   });
 
   it('should get tarball', function(done) {
-    var promise = npmUtil.downloadTarball('bower', '1.7.7', __dirname);
+    var promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
     expect(promise).toBeDefined();
 
     promise
