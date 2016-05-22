@@ -35,7 +35,8 @@ describe('resolver', function() {
   beforeEach(function() {
     resolver = factory({
       config: {},
-      version: '1.7.7'
+      version: '1.7.7',
+      logger: jasmine.createSpyObj('logger', ['debug'])
     });
   });
 

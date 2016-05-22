@@ -35,8 +35,11 @@ var bowerUtils = require('./bower-utils');
 var matcherUtils = require('./matcher-utils');
 
 module.exports = function resolver(bower) {
+  var logger = bower.logger;
+
   // Read configuration passed via .bowerrc
   var matchers = matcherUtils.getFromConfig(bower.config.bowerNpmResolver);
+  logger.debug('npm-resolver', 'found matchers: ' + JSON.stringify(matchers));
 
   /**
    * Extract package name from package source.
@@ -64,6 +67,7 @@ module.exports = function resolver(bower) {
      * @return {boolean} `true` if source match this resolver, `false` otherwise.
      */
     match: function(source) {
+      logger.debug('npm-resolver', 'checking for: ' + source);
       return matchers.test(source);
     },
 
@@ -76,8 +80,12 @@ module.exports = function resolver(bower) {
      * @return {Promise} Promise resolved with available releases versions.
      */
     releases: function(source) {
+      logger.debug('npm-resolver', 'extracting package name from: ' + source);
       var pkg = extractPackageName(source);
+
+      logger.debug('npm-resolver', 'fetching releases information from: ' + pkg);
       return npmUtils.releases(pkg).then(function(versions) {
+        logger.debug('npm-resolver', 'found releases: ' + versions);
         return versions.map(function(v) {
           return {
             target: v,
@@ -110,11 +118,14 @@ module.exports = function resolver(bower) {
      * @see http://bower.io/docs/pluggable-resolvers/#resolverfetch
      */
     fetch: function(endpoint, cached) {
+      logger.debug('npm-resolver', 'fetching: ' + JSON.stringify(endpoint));
+
       // If cached version of package exists, re-use it
       if (cached && cached.version) {
         return undefined;
       }
 
+      logger.debug('npm-resolver', 'extracting package name from: ' + endpoint.source);
       var pkg = extractPackageName(endpoint.source);
 
       // Directory where the tgz will be stored.
@@ -127,16 +138,19 @@ module.exports = function resolver(bower) {
         unsafeCleanup: true
       });
 
+      logger.debug('npm-resolver', 'downloading tarball for: ' + pkg + '#' + endpoint.target);
       return npmUtils.downloadTarball(pkg, endpoint.target, tmpTar.name)
 
         // Download ok, extract tarball.
         .then(function(tarballPath) {
+          logger.debug('npm-resolver', 'extracting tarball from: ' + tarballPath);
           return extract.tgz(tarballPath, tmpPackage.name);
         })
 
         // Patch configuration with `package.json` file if `bower.json` does not exist.
         .then(function(dir) {
           var pkgPath = path.join(dir, 'package');
+          logger.debug('npm-resolver', 'extracting and patching bower.json from: ' + pkgPath);
           return bowerUtils.patchConfiguration(pkgPath).then(function() {
             return {
               tempPath: pkgPath,
