@@ -30,7 +30,9 @@
  */
 
 var Q = require('q');
+var fs = require('fs');
 var npm = require('npm');
+var path = require('path');
 
 var wrapCallback = function(deferred) {
   return function(err, data) {
@@ -56,6 +58,31 @@ var execViewCommand = function(args) {
   return deferred.promise;
 };
 
+/**
+ * Executes `npm pack` command with passed arguments. Arguments is the array of command
+ * line options. So if cmd command was `npm pack bower@1.7.7 jasmine`, then array of
+ * arguments would be ['bower@1.7.7', 'jasmine'].
+ *
+ * The returned promise will be resolved with array of tarball paths relative to process.cwd()
+ * (i.e. ['bower-1.7.7.tgz', 'jasmine-2.4.1.tgz'])
+ *
+ * @param {Array} args Arguments object
+ * @return {Promise} The promise object
+ */
+var execPackCommand = function(args) {
+  var deferred = Q.defer();
+
+  npm.load(function(err) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      npm.commands.pack(args, true, wrapCallback(deferred));
+    }
+  });
+
+  return deferred.promise;
+};
+
 var getLastKey = function(o) {
   var keys = Object.keys(o);
   keys.sort();
@@ -63,35 +90,6 @@ var getLastKey = function(o) {
 };
 
 module.exports = {
-
-  /**
-   * This method will return a promise resolved with NPM proxy
-   * configuration.
-   * Basically, it loads NPM, get proxy settings (`proxy` and `https-proxy` entry) and
-   * resolve the promise with an object containing these two entries, such as:
-   *
-   * ```json
-   *  { 'proxy': 'http://proxy:8080', 'https-proxy': 'https://proxy:8080' }
-   * ```
-   *
-   * @return {Promise} The promise.
-   */
-  proxy: function() {
-    var deferred = Q.defer();
-
-    npm.load(function(err, data) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve({
-          'proxy': data.config.get('proxy'),
-          'https-proxy': data.config.get('https-proxy')
-        });
-      }
-    });
-
-    return deferred.promise;
-  },
 
   /**
    * Return the versions defined on NPM for a given package.
@@ -121,33 +119,26 @@ module.exports = {
   },
 
   /**
-   * Return tarball URL for a given package and version.
-   * Basically, execute `npm view pkg@version dist.tarball` and return the results.
-   *
-   * As with the `releases` method, note that NPM will return an object, such as:
-   *
-   * ```json
-   *   { '1.7.7': { 'dist.tarball': 'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz' } }
-   * ```
+   * Download tarball using `npm pack pkg@version`, move to temporary folder and return
+   * the location of the tarball in the temporary folder.
    *
    * The promise will be resolved with the tarball
-   * URL (i.e `'http://registry.npmjs.org/bower/-/bower-1.7.7.tgz'`).
+   * path (i.e. `'/home/user/.cache/bower-1.7.7.tgz'`).
    *
    * @param {String} pkg The package name.
    * @param {String} version The package version.
+   * @param {String} [dir] Tarball download location.
    * @return {Promise} The promise object.
    */
-  tarball: function(pkg, version) {
-    return execViewCommand([pkg + '@' + version, 'dist.tarball'])
-      .then(function(data) {
-        // If object contains the tarball URL, return it.
-        if (data['dist.tarball']) {
-          return data['dist.tarball'];
-        }
-
-        // Otherwise, unwrap it.
-        var mostRecentVersion = getLastKey(data);
-        return data[mostRecentVersion]['dist.tarball'];
+  downloadTarball: function(pkg, version, dir) {
+    var oldCWD = process.cwd();
+    process.chdir(dir);
+    return execPackCommand([pkg + '@' + version])
+      .then(function(filename) {
+        return path.resolve(dir || process.cwd(), filename[0]);
+      })
+      .finally(function() {
+        process.chdir(oldCWD);
       });
   }
 };

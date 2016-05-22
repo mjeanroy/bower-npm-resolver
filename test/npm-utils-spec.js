@@ -22,43 +22,20 @@
  * SOFTWARE.
  */
 
+var tmp = require('tmp');
 var npmUtil = require('../src/npm-utils');
 
 describe('npm-utils', function() {
-  it('should get the proxy', function(done) {
-    var promise = npmUtil.proxy();
-    expect(promise).toBeDefined();
+  var tmpDir;
 
-    promise
-      .then(function(config) {
-        var keys = Object.keys(config);
-        keys.sort();
-        expect(keys).toEqual(['https-proxy', 'proxy']);
-      })
-      .catch(function() {
-        jasmine.fail('Unable to get tarball URL');
-      })
-      .finally(function() {
-        done();
-      });
+  beforeEach(function() {
+    tmpDir = tmp.dirSync({
+      unsafeCleanup: true
+    });
   });
 
-  it('should get tarball url', function(done) {
-    var promise = npmUtil.tarball('bower', '1.7.7');
-    expect(promise).toBeDefined();
-
-    promise
-      .then(function(url) {
-        expect(url).toBeDefined();
-        expect(url).toContains('bower');
-        expect(url).toContains('1.7.7');
-      })
-      .catch(function() {
-        jasmine.fail('Unable to get tarball URL');
-      })
-      .finally(function() {
-        done();
-      });
+  afterEach(function() {
+    tmpDir.removeCallback();
   });
 
   it('should get list of releases', function(done) {
@@ -72,6 +49,24 @@ describe('npm-utils', function() {
       })
       .catch(function() {
         jasmine.fail('Unable to get list of releases');
+      })
+      .finally(function() {
+        done();
+      });
+  });
+
+  it('should get tarball', function(done) {
+    var promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
+    expect(promise).toBeDefined();
+
+    promise
+      .then(function(path) {
+        expect(path.length).toBeGreaterThan(0);
+        expect(path).toContains('bower');
+        expect(path).toContains('1.7.7');
+      })
+      .catch(function() {
+        jasmine.fail('Unable to download the tarball');
       })
       .finally(function() {
         done();

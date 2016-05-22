@@ -30,7 +30,6 @@
 var tmp = require('tmp');
 var path = require('path');
 var npmUtils = require('./npm-utils');
-var download = require('./download');
 var extract = require('./extract');
 var bowerUtils = require('./bower-utils');
 var matcherUtils = require('./matcher-utils');
@@ -128,12 +127,7 @@ module.exports = function resolver(bower) {
         unsafeCleanup: true
       });
 
-      return npmUtils.tarball(pkg, endpoint.target)
-
-        // We have the tarball URL, download it.
-        .then(function(tarballUrl) {
-          return download.fetch(tarballUrl, tmpTar.name);
-        })
+      return npmUtils.downloadTarball(pkg, endpoint.target, tmpTar.name)
 
         // Download ok, extract tarball.
         .then(function(tarballPath) {
