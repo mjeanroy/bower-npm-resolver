@@ -135,8 +135,10 @@ module.exports = {
     process.chdir(dir);
     return execPackCommand([pkg + '@' + version])
       .then(function(filename) {
-        process.chdir(oldCWD);
         return path.resolve(dir || process.cwd(), filename[0]);
+      })
+      .finally(function() {
+        process.chdir(oldCWD);
       });
   }
 };
