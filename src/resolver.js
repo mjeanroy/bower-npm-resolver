@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
- /**
-  * Factory function for the resolver.
-  * Will be called only one time by Bower, to instantiate resolver.
-  */
+/**
+ * Factory function for the resolver.
+ * Will be called only one time by Bower, to instantiate resolver.
+ */
 
-var tmp = require('tmp');
+var mkdirp = require('mkdirp');
 var path = require('path');
 var npmUtils = require('./npm-utils');
 var extract = require('./extract');
@@ -129,22 +129,20 @@ module.exports = function resolver(bower) {
       var pkg = extractPackageName(endpoint.source);
 
       // Directory where the tgz will be stored.
-      var tmpTar = tmp.dirSync({
-        unsafeCleanup: true
-      });
+      var compressedDir = path.join(bower.config.storage.packages, 'npm-resolver/compressed');
+      mkdirp.sync(compressedDir);
 
       // Directory where the tgz file will be extracted.
-      var tmpPackage = tmp.dirSync({
-        unsafeCleanup: true
-      });
+      var uncompressedDir = path.join(bower.config.storage.packages, 'npm-resolver/uncompressed', pkg, endpoint.target);
+      mkdirp.sync(uncompressedDir);
 
       logger.debug('npm-resolver', 'downloading tarball for: ' + pkg + '#' + endpoint.target);
-      return npmUtils.downloadTarball(pkg, endpoint.target, tmpTar.name)
+      return npmUtils.downloadTarball(pkg, endpoint.target, compressedDir)
 
         // Download ok, extract tarball.
         .then(function(tarballPath) {
-          logger.debug('npm-resolver', 'extracting tarball from: ' + tarballPath);
-          return extract.tgz(tarballPath, tmpPackage.name);
+          logger.debug('npm-resolver', 'extracting tarball from: "' + tarballPath + '" to "' + uncompressedDir);
+          return extract.tgz(tarballPath, uncompressedDir);
         })
 
         // Patch configuration with `package.json` file if `bower.json` does not exist.
@@ -157,16 +155,6 @@ module.exports = function resolver(bower) {
               removeIgnores: true
             };
           });
-        })
-
-        // When an error occured, remove temporary directory.
-        .catch(function() {
-          tmpPackage.removeCallback();
-        })
-
-        // Always remove the temporary directory for the tgz file.
-        .finally(function() {
-          tmpTar.removeCallback();
         });
     }
   };
