@@ -28,16 +28,30 @@ var factory = require('../src/resolver');
 var npmUtils = require('../src/npm-utils');
 var extract = require('../src/extract');
 var bowerUtils = require('../src/bower-utils');
+var tmp = require('tmp');
 
 describe('resolver', function() {
   var resolver;
+  var tmpDir;
 
   beforeEach(function() {
+    tmpDir = tmp.dirSync({
+      unsafeCleanup: true
+    });
+
     resolver = factory({
-      config: {},
+      config: {
+        storage: {
+          packages: tmpDir.name
+        }
+      },
       version: '1.7.7',
       logger: jasmine.createSpyObj('logger', ['debug'])
     });
+  });
+
+  afterEach(function() {
+    tmpDir.removeCallback();
   });
 
   it('should get list of releases', function(done) {

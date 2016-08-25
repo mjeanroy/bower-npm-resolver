@@ -30,7 +30,6 @@
  */
 
 var Q = require('q');
-var fs = require('fs');
 var npm = require('npm');
 var path = require('path');
 
@@ -131,14 +130,10 @@ module.exports = {
    * @return {Promise} The promise object.
    */
   downloadTarball: function(pkg, version, dir) {
-    var oldCWD = process.cwd();
     process.chdir(dir);
     return execPackCommand([pkg + '@' + version])
       .then(function(filename) {
         return path.resolve(dir || process.cwd(), filename[0]);
-      })
-      .finally(function() {
-        process.chdir(oldCWD);
       });
   }
 };
