@@ -36,12 +36,12 @@
     "underscore": "1.8.3"
   },
   "devDependencies": {
-    "eslint": "2.9.0",
-    "eslint-config-google": "0.5.0",
-    "eslint-config-xo": "0.14.1",
+    "eslint": "3.4.0",
+    "eslint-config-google": "0.6.0",
+    "eslint-config-xo": "0.15.4",
     "gulp": "3.9.1",
     "gulp-bump": "2.1.0",
-    "gulp-eslint": "2.0.0",
+    "gulp-eslint": "3.0.1",
     "gulp-git": "1.7.1",
     "gulp-jasmine": "2.4.0",
     "gulp-util": "3.0.7",
