@@ -129,6 +129,10 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.5.0
+  - Fix a bug with temporary directory being removed between two downloads.
+- 0.4.0
+  - Use `npm pack` command to download packages (using npm proxy settings).
 - 0.3.0
   - Use `npm:` prefix.
   - Support scope packages.
