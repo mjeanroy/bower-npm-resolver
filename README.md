@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/mjeanroy/bower-npm-resolver.svg?branch=master)](https://travis-ci.org/mjeanroy/bower-npm-resolver)
 
+[![Get it on npm](https://nodei.co/npm/bower-npm-resolver.png?compact=true)](https://www.npmjs.org/package/bower-npm-resolver)
+
 A [custom Bower resolver](http://bower.io/docs/pluggable-resolvers/) supporting installation of NPM packages.
 This resolver should be used if the package (or the version of the package you want to use) is not available on default
 resolvers (bower registry, github, etc.).
