@@ -29,8 +29,9 @@
  *  - Rejected with the error returned from NPM.
  */
 
+var requireg = require('requireg');
 var Q = require('q');
-var npm = require('npm');
+var npm = requireg('npm');
 var path = require('path');
 
 var wrapCallback = function(deferred) {
