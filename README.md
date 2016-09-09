@@ -129,6 +129,8 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.6.0
+  - Use global npm instead of local module.
 - 0.5.0
   - Fix a bug with temporary directory being removed between two downloads.
 - 0.4.0
