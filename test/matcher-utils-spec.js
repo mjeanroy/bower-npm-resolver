@@ -24,6 +24,11 @@
 
 var matcherUtils = require('../src/matcher-utils');
 
+/**
+ * Iterate over object keys and trigger callback for each entry.
+ * @param {object} obj Object to iterate.
+ * @param {function} callback Iteration callback.
+ */
 function forEachObjectAsMap(obj, callback) {
   Object.keys(obj).forEach(function(key) {
     callback(obj[key], key, obj);
