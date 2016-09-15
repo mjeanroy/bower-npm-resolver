@@ -36,7 +36,8 @@
     "q": "1.4.1",
     "requireg": "^0.1.5",
     "tar-fs": "1.13.2",
-    "underscore": "1.8.3"
+    "underscore": "1.8.3",
+    "fs-write-stream-atomic": "1.0.8"
   },
   "devDependencies": {
     "eslint": "3.4.0",

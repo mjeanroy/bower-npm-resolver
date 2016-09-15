@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+var fs = require('fs');
 var path = require('path');
 var tmp = require('tmp');
 var npmUtil = require('../src/npm-utils');
@@ -84,6 +85,22 @@ describe('npm-utils', function() {
       });
   });
 
+  it('should not change current working directory', function(done) {
+    var cwd = process.cwd();
+    var promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
+
+    promise
+      .then(function(path) {
+        expect(process.cwd()).toBe(cwd);
+      })
+      .catch(function() {
+        jasmine.fail('Unable to download the tarball');
+      })
+      .finally(function() {
+        done();
+      });
+  });
+
   it('should get tarball with relative path', function(done) {
     var newTmpDir = tmp.dirSync({
       unsafeCleanup: true,
@@ -94,17 +111,34 @@ describe('npm-utils', function() {
     var expected = path.join(newTmpDir.name, 'bower-1.7.7.tgz');
 
     var promise = npmUtil.downloadTarball('bower', '1.7.7', relativeToCwd);
-    expect(promise).toBeDefined();
 
     promise
       .then(function(path) {
         expect(path).toBe(expected);
+        expect(fs.statSync(path).isFile()).toBe(true);
       })
       .catch(function() {
         jasmine.fail('Unable to download the tarball');
       })
       .finally(function() {
         newTmpDir.removeCallback();
+        done();
+      });
+  });
+
+  it('should get scoped package tarball', function(done) {
+    var expected = path.join(tmpDir.name, 'angular-core-2.0.0.tgz');
+    var promise = npmUtil.downloadTarball('@angular/core', '2.0.0', tmpDir.name);
+
+    promise
+      .then(function(path) {
+        expect(path).toBe(expected);
+        expect(fs.statSync(path).isFile()).toBe(true);
+      })
+      .catch(function() {
+        jasmine.fail('Unable to download the tarball');
+      })
+      .finally(function() {
         done();
       });
   });

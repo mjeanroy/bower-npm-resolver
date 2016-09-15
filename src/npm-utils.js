@@ -30,9 +30,12 @@
  */
 
 var requireg = require('requireg');
-var Q = require('q');
 var npm = requireg('npm');
+
+var Q = require('q');
 var path = require('path');
+var fs = require('fs');
+var writeStreamAtomic = require('fs-write-stream-atomic');
 
 var wrapCallback = function(deferred) {
   return function(err, data) {
@@ -59,24 +62,25 @@ var execViewCommand = function(args) {
 };
 
 /**
- * Executes `npm pack` command with passed arguments. Arguments is the array of command
- * line options. So if cmd command was `npm pack bower@1.7.7 jasmine`, then array of
- * arguments would be ['bower@1.7.7', 'jasmine'].
+ * Executes `npm cache-add` command with passed arguments.
+ * Arguments is the name of the cache to download.
+ * So if cmd command was `npm cache-add bower@1.7.7`, then argument
+ * would be 'bower@1.7.7'.
  *
- * The returned promise will be resolved with array of tarball paths relative to process.cwd()
- * (i.e. ['bower-1.7.7.tgz', 'jasmine-2.4.1.tgz'])
+ * The returned promise will be resolved with the result of the cache command (i.e
+ * object with all informations about the package).
  *
- * @param {Array} args Arguments object
+ * @param {Array} pkg THe package to download.
  * @return {Promise} The promise object
  */
-var execPackCommand = function(args) {
+var execCacheCommand = function(pkg) {
   var deferred = Q.defer();
 
   npm.load(function(err) {
     if (err) {
       deferred.reject(err);
     } else {
-      npm.commands.pack(args, true, wrapCallback(deferred));
+      npm.commands.cache.add(pkg, null, null, false, wrapCallback(deferred));
     }
   });
 
@@ -131,11 +135,44 @@ module.exports = {
    * @return {Promise} The promise object.
    */
   downloadTarball: function(pkg, version, dir) {
-    var absoluteDir = path.resolve(dir);
-    process.chdir(dir);
-    return execPackCommand([pkg + '@' + version])
-      .then(function(filename) {
-        return path.join(absoluteDir, filename[0]);
+    var deferred = Q.defer();
+
+    execCacheCommand(pkg + '@' + version)
+      .then(function(data) {
+        // The original `pack` command does not support custom directory output.
+        // So, to avoid to change the current working directory pointed by `process.cwd()` (i.e
+        // to avoid side-effect), we just copy the file manually.
+        // This is basically what is done by `npm pack` command.
+        // See: https://github.com/npm/npm/issues/4074
+        // See: https://github.com/npm/npm/blob/v3.10.8/lib/pack.js#L49
+        var targetDir = path.resolve(dir);
+        var tarball = path.resolve(npm.cache, data.name, data.version, 'package.tgz');
+
+        var name = data.name;
+
+        // scoped packages get special treatment
+        if (name[0] === '@') {
+          name = name.substr(1).replace(/\//g, '-');
+        }
+
+        var fileName = name + '-' + data.version + '.tgz';
+
+        var outputFile = path.join(targetDir, fileName);
+        var inputStream = fs.createReadStream(tarball);
+        var outputStream = writeStreamAtomic(outputFile);
+
+        // Handle errors.
+        inputStream.on('error', deferred.reject);
+        outputStream.on('error', deferred.reject);
+
+        // Handle success.
+        outputStream.on('close', function() {
+          deferred.resolve(outputFile);
+        });
+
+        inputStream.pipe(outputStream);
       });
+
+    return deferred.promise;
   }
 };
