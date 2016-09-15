@@ -22,11 +22,22 @@
  * SOFTWARE.
  */
 
+var path = require('path');
 var tmp = require('tmp');
 var npmUtil = require('../src/npm-utils');
 
 describe('npm-utils', function() {
   var tmpDir;
+  var originalTimeout;
+
+  beforeEach(function() {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+  });
+
+  afterEach(function() {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  });
 
   beforeEach(function() {
     tmpDir = tmp.dirSync({
@@ -69,6 +80,31 @@ describe('npm-utils', function() {
         jasmine.fail('Unable to download the tarball');
       })
       .finally(function() {
+        done();
+      });
+  });
+
+  it('should get tarball with relative path', function(done) {
+    var newTmpDir = tmp.dirSync({
+      unsafeCleanup: true,
+      dir: path.join(__dirname, '..')
+    });
+
+    var relativeToCwd = path.relative(process.cwd(), newTmpDir.name);
+    var expected = path.join(newTmpDir.name, 'bower-1.7.7.tgz');
+
+    var promise = npmUtil.downloadTarball('bower', '1.7.7', relativeToCwd);
+    expect(promise).toBeDefined();
+
+    promise
+      .then(function(path) {
+        expect(path).toBe(expected);
+      })
+      .catch(function() {
+        jasmine.fail('Unable to download the tarball');
+      })
+      .finally(function() {
+        newTmpDir.removeCallback();
         done();
       });
   });

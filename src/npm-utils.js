@@ -131,10 +131,11 @@ module.exports = {
    * @return {Promise} The promise object.
    */
   downloadTarball: function(pkg, version, dir) {
+    var absoluteDir = path.resolve(dir);
     process.chdir(dir);
     return execPackCommand([pkg + '@' + version])
       .then(function(filename) {
-        return path.resolve(dir || process.cwd(), filename[0]);
+        return path.join(absoluteDir, filename[0]);
       });
   }
 };
