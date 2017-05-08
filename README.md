@@ -1,5 +1,7 @@
 # bower-npm-resolver
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/mjeanroy/bower-npm-resolver.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/mjeanroy/bower-npm-resolver.svg?branch=master)](https://travis-ci.org/mjeanroy/bower-npm-resolver)
 
 [![Get it on npm](https://nodei.co/npm/bower-npm-resolver.png?compact=true)](https://www.npmjs.org/package/bower-npm-resolver)
