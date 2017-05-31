@@ -77,7 +77,7 @@ gulp.task('tdd', ['test'], () => {
 });
 
 gulp.task('pretag', () => {
-  return gulp.src([PKG_JSON, DIST])
+  return gulp.src([PKG, DIST])
     .pipe(git.add({args: '-f'}))
     .pipe(git.commit('release: release version'));
 });
