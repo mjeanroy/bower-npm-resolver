@@ -73,14 +73,11 @@ describe('bower-utils', () => {
       expect(bowerJson).toEqual(jasmine.objectContaining(config));
       expect(bowerJson.dependencies).toEqual({});
       expect(bowerJson.devDependencies).toEqual({});
+      done();
     });
 
     p.catch(() => {
-      jasmine.fail();
-    });
-
-    p.finally(() => {
-      done();
+      done.fail();
     });
   });
 
@@ -121,14 +118,11 @@ describe('bower-utils', () => {
     p.then(() => {
       expect(fs.statSync(path.join(tmpDir.name, 'bower.json')).isFile()).toBe(true);
       expect(JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'))).toEqual(bowerConfig);
+      done();
     });
 
     p.catch(() => {
-      jasmine.fail();
-    });
-
-    p.finally(() => {
-      done();
+      done.fail();
     });
   });
 
@@ -150,14 +144,11 @@ describe('bower-utils', () => {
 
       const bowerJson = JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'));
       expect(bowerJson.name).toEqual(normalizedName);
+      done();
     });
 
     p.catch(() => {
-      jasmine.fail();
-    });
-
-    p.finally(() => {
-      done();
+      done.fail();
     });
   });
 });

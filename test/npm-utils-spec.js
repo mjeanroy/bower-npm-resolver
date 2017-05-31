@@ -59,13 +59,11 @@ describe('npm-utils', () => {
     promise
       .then((releases) => {
         expect(releases.length).toBeGreaterThan(0);
-        expect(releases).toContains('1.7.7');
+        expect(releases).toContain('1.7.7');
+        done();
       })
       .catch(() => {
-        jasmine.fail('Unable to get list of releases');
-      })
-      .finally(() => {
-        done();
+        done.fail('Unable to get list of releases');
       });
   });
 

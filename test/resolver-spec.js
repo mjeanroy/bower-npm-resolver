@@ -78,8 +78,7 @@ describe('resolver', () => {
     });
 
     const error = jasmine.createSpy('error').and.callFake(() => {
-      jasmine.fail();
-      done();
+      done.fail();
     });
 
     result.then(success, error);
@@ -109,7 +108,7 @@ describe('resolver', () => {
 
     // Fail if something bad happen.
     result.catch(() => {
-      jasmine.fail();
+      done.fail();
     });
 
     expect(result).toBeDefined();

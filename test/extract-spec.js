@@ -57,12 +57,10 @@ describe('extract', () => {
       .then((extracted) => {
         expect(extracted).toBeDefined();
         expect(fs.statSync(extracted).isDirectory()).toBe(true);
+        done();
       })
       .catch(() => {
-        jasmine.fail();
-      })
-      .finally(() => {
-        done();
+        done.fail();
       });
   });
 });
