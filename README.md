@@ -149,10 +149,7 @@ MIT License (MIT)
 
 If you find a bug or think about enhancement, feel free to contribute and submit an issue or a pull request.
 
-To work in TDD mode:
-
-    npm install -g jasmine-node@2
-    jasmine-node test --autoTest --watchFolders src
+To work in TDD mode, just run: `npm run tdd`.
 
 ## Credits
 

@@ -7,6 +7,7 @@
     "clean": "gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
+    "tdd": "gulp tdd",
     "build": "gulp build",
     "release": "gulp release",
     "release:patch": "gulp release:patch",
@@ -34,12 +35,12 @@
   },
   "dependencies": {
     "escape-string-regexp": "^1.0.5",
+    "fs-write-stream-atomic": "1.0.10",
+    "lodash": "4.17.4",
     "mkdirp": "^0.5.1",
     "q": "1.5.0",
     "requireg": "^0.1.6",
-    "tar-fs": "1.15.2",
-    "underscore": "1.8.3",
-    "fs-write-stream-atomic": "1.0.10"
+    "tar-fs": "1.15.2"
   },
   "devDependencies": {
     "babel-core": "6.24.1",
@@ -57,5 +58,6 @@
     "jasmine-core": "2.6.2",
     "run-sequence": "1.2.2",
     "tmp": "0.0.31"
-  }
+  },
+  "false": {}
 }

@@ -34,7 +34,7 @@
 const path = require('path');
 const fs = require('fs');
 const Q = require('q');
-const _ = require('underscore');
+const _ = require('lodash');
 
 /**
  * Check that a given path is a valid file and returns a promise

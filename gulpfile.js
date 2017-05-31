@@ -66,6 +66,16 @@ gulp.task('test', ['build'], () => {
   return gulp.src(path.join(TEST, '*.js')).pipe(jasmine());
 });
 
+// Rerun the task when a file changes
+gulp.task('tdd', ['test'], () => {
+  const sources = [
+    path.join(SRC, '**', '*.js'),
+    path.join(TEST, '**', '*.js'),
+  ];
+
+  gulp.watch(sources, ['test']);
+});
+
 gulp.task('pretag', () => {
   return gulp.src([PKG_JSON, DIST])
     .pipe(git.add({args: '-f'}))

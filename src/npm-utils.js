@@ -31,29 +31,34 @@
  *  - Rejected with the error returned from NPM.
  */
 
+const _ = require('lodash');
 const requireg = require('requireg');
 const npm = requireg('npm');
-
 const Q = require('q');
 const path = require('path');
 const fs = require('fs');
 const writeStreamAtomic = require('fs-write-stream-atomic');
 
 /**
- * Wrap NodeJS callback style to a function that will resolve or reject a promise.
+ * Load NPM and execute the given callback giving the deferred that should be
+ * resolved or rejected in callback parameter.
  *
- * @param {Object} deferred The deferred object that will be resolved/rejected.
- * @return {function} The function that will resolve/reject the promise.
+ * @param {function} cb The callback function executed once NPM has been loaded.
+ * @return {Object} A promise, rejected if NPM cannot be loaded.
  */
-function wrapCallback(deferred) {
-  return (err, data) => {
+function execNpm(cb) {
+  const deferred = Q.defer();
+
+  npm.load((err) => {
     if (err) {
       deferred.reject(err);
     } else {
-      deferred.resolve(data);
+      cb(deferred);
     }
-  };
-};
+  });
+
+  return deferred.promise;
+}
 
 /**
  * Executes `npm view` command with passed arguments.
@@ -68,18 +73,16 @@ function wrapCallback(deferred) {
  * @return {Promise} The promise object
  */
 function execViewCommand(args) {
-  const deferred = Q.defer();
-
-  npm.load((err) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      npm.commands.view(args, true, wrapCallback(deferred));
-    }
+  return execNpm((deferred) => {
+    npm.commands.view(args, true, (err, data) => {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        deferred.resolve(data);
+      }
+    });
   });
-
-  return deferred.promise;
-};
+}
 
 /**
  * Executes `npm cache-add` command with passed arguments.
@@ -94,18 +97,22 @@ function execViewCommand(args) {
  * @return {Promise} The promise object
  */
 function execCacheCommand(pkg) {
-  const deferred = Q.defer();
+  return execNpm((deferred) => {
+    const cb = _.once((err, data) => {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        deferred.resolve(data);
+      }
+    });
 
-  npm.load((err) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      npm.commands.cache.add(pkg, null, null, false, wrapCallback(deferred));
+    // NPM >= 5.0.0 now returns a promise instead of using last parameter as a callback
+    const result = npm.commands.cache.add(pkg, null, null, false, cb);
+    if (result && _.isFunction(result.then) && _.isFunction(result.catch)) {
+      result.then((data) => cb(null, data.manifest)).catch((err) => cb(err, null));
     }
   });
-
-  return deferred.promise;
-};
+}
 
 /**
  * Returns the last key (in alpha-numeric order) of an object.
@@ -197,6 +204,9 @@ module.exports = {
         });
 
         inputStream.pipe(outputStream);
+      })
+      .catch((err) => {
+        console.log('err: ', err);
       });
 
     return deferred.promise;
