@@ -131,6 +131,11 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.8.0
+  - Fix an incompatibility with NPM >= 5.0.0
+- 0.7.0
+  - Fix a bug with `requireg` module.
+  - Remove `cwd` update side effect.
 - 0.6.0
   - Use global npm instead of local module.
 - 0.5.0
