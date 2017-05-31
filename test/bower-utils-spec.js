@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,28 @@
  * SOFTWARE.
  */
 
-var path = require('path');
-var tmp = require('tmp');
-var fs = require('fs');
-var bowerUtil = require('../src/bower-utils');
+'use strict';
 
-describe('bower-utils', function() {
-  var tmpDir;
+const path = require('path');
+const tmp = require('tmp');
+const fs = require('fs');
+const bowerUtil = require('../dist/bower-utils');
 
-  beforeEach(function() {
+describe('bower-utils', () => {
+  let tmpDir;
+
+  beforeEach(() => {
     tmpDir = tmp.dirSync({
-      unsafeCleanup: true
+      unsafeCleanup: true,
     });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     tmpDir.removeCallback();
   });
 
-  it('should create json file from package json', function(done) {
-    var config = {
+  it('should create json file from package json', (done) => {
+    const config = {
       name: 'bower-npm-resolver',
       description: 'This is a fake module',
       main: 'src/resolver.js',
@@ -54,36 +56,36 @@ describe('bower-utils', function() {
       homepage: 'https://github.com/mjeanroy/bower-npm-resolver',
       repository: {
         type: 'git',
-        url: 'https://github.com/mjeanroy/bower-npm-resolver.git'
+        url: 'https://github.com/mjeanroy/bower-npm-resolver.git',
       },
-      private: false
+      private: false,
     };
 
     fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(config, null, 2), 'utf-8');
 
-    var p = bowerUtil.patchConfiguration(tmpDir.name);
+    const p = bowerUtil.patchConfiguration(tmpDir.name);
     expect(p).toBeDefined();
 
-    p.then(function() {
+    p.then(() => {
       expect(fs.statSync(path.join(tmpDir.name, 'bower.json')).isFile()).toBe(true);
 
-      var bowerJson = JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'));
+      const bowerJson = JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'));
       expect(bowerJson).toEqual(jasmine.objectContaining(config));
       expect(bowerJson.dependencies).toEqual({});
       expect(bowerJson.devDependencies).toEqual({});
     });
 
-    p.catch(function() {
+    p.catch(() => {
       jasmine.fail();
     });
 
-    p.finally(function() {
+    p.finally(() => {
       done();
     });
   });
 
-  it('should not create json file if bower.json already exist', function(done) {
-    var packageConfig = {
+  it('should not create json file if bower.json already exist', (done) => {
+    const packageConfig = {
       name: 'foo',
       description: 'This is a fake module',
       main: 'foo.js',
@@ -92,10 +94,10 @@ describe('bower-utils', function() {
       authors: ['mickael.jeanroy@gmail.com'],
       license: 'MIT',
       ignore: ['test'],
-      private: false
+      private: false,
     };
 
-    var bowerConfig = {
+    const bowerConfig = {
       name: 'foo',
       description: 'This is a fake module',
       main: 'foo.js',
@@ -106,55 +108,55 @@ describe('bower-utils', function() {
       ignore: ['test'],
       private: false,
       dependencies: {
-        jquery: '1.11.0'
-      }
+        jquery: '1.11.0',
+      },
     };
 
     fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(packageConfig, null, 2), 'utf-8');
     fs.writeFileSync(path.join(tmpDir.name, 'bower.json'), JSON.stringify(bowerConfig, null, 2), 'utf-8');
 
-    var p = bowerUtil.patchConfiguration(tmpDir.name);
+    const p = bowerUtil.patchConfiguration(tmpDir.name);
     expect(p).toBeDefined();
 
-    p.then(function() {
+    p.then(() => {
       expect(fs.statSync(path.join(tmpDir.name, 'bower.json')).isFile()).toBe(true);
       expect(JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'))).toEqual(bowerConfig);
     });
 
-    p.catch(function() {
+    p.catch(() => {
       jasmine.fail();
     });
 
-    p.finally(function() {
+    p.finally(() => {
       done();
     });
   });
 
-  it('should normalize scoped package names', function(done) {
-    var config = {
+  it('should normalize scoped package names', (done) => {
+    const config = {
       name: '@scope/my-package',
-      description: 'This is a fake scoped package'
+      description: 'This is a fake scoped package',
     };
 
-    var normalizedName = 'scope-my-package';
+    const normalizedName = 'scope-my-package';
 
     fs.writeFileSync(path.join(tmpDir.name, 'package.json'), JSON.stringify(config, null, 2), 'utf-8');
 
-    var p = bowerUtil.patchConfiguration(tmpDir.name);
+    const p = bowerUtil.patchConfiguration(tmpDir.name);
     expect(p).toBeDefined();
 
-    p.then(function() {
+    p.then(() => {
       expect(fs.statSync(path.join(tmpDir.name, 'bower.json')).isFile()).toBe(true);
 
-      var bowerJson = JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'));
+      const bowerJson = JSON.parse(fs.readFileSync(path.join(tmpDir.name, 'bower.json'), 'utf-8'));
       expect(bowerJson.name).toEqual(normalizedName);
     });
 
-    p.catch(function() {
+    p.catch(() => {
       jasmine.fail();
     });
 
-    p.finally(function() {
+    p.finally(() => {
       done();
     });
   });

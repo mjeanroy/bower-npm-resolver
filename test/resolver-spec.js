@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,60 +22,62 @@
  * SOFTWARE.
  */
 
-var path = require('path');
-var Q = require('q');
-var factory = require('../src/resolver');
-var npmUtils = require('../src/npm-utils');
-var extract = require('../src/extract');
-var bowerUtils = require('../src/bower-utils');
-var tmp = require('tmp');
+'use strict';
 
-describe('resolver', function() {
-  var resolver;
-  var tmpDir;
+const path = require('path');
+const Q = require('q');
+const factory = require('../dist/resolver');
+const npmUtils = require('../dist/npm-utils');
+const extract = require('../dist/extract');
+const bowerUtils = require('../dist/bower-utils');
+const tmp = require('tmp');
 
-  beforeEach(function() {
+describe('resolver', () => {
+  let resolver;
+  let tmpDir;
+
+  beforeEach(() => {
     tmpDir = tmp.dirSync({
-      unsafeCleanup: true
+      unsafeCleanup: true,
     });
 
     resolver = factory({
       config: {
         storage: {
-          packages: tmpDir.name
-        }
+          packages: tmpDir.name,
+        },
       },
       version: '1.7.7',
-      logger: jasmine.createSpyObj('logger', ['debug'])
+      logger: jasmine.createSpyObj('logger', ['debug']),
     });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     tmpDir.removeCallback();
   });
 
-  it('should get list of releases', function(done) {
-    var source = 'npm:bower';
-    var defer = Q.defer();
-    var promise = defer.promise;
+  it('should get list of releases', (done) => {
+    const source = 'npm:bower';
+    const defer = Q.defer();
+    const promise = defer.promise;
     spyOn(npmUtils, 'releases').and.returnValue(promise);
 
-    var result = resolver.releases(source);
+    const result = resolver.releases(source);
 
     expect(npmUtils.releases).toHaveBeenCalledWith('bower');
     expect(result).toBeDefined();
     expect(result).not.toBe(promise);
 
-    var success = jasmine.createSpy('success').and.callFake(function(data) {
+    const success = jasmine.createSpy('success').and.callFake((data) => {
       expect(data).toEqual([
         {target: '1.0.0', version: '1.0.0'},
-        {target: '2.0.0', version: '2.0.0'}
+        {target: '2.0.0', version: '2.0.0'},
       ]);
 
       done();
     });
 
-    var error = jasmine.createSpy('error').and.callFake(function() {
+    const error = jasmine.createSpy('error').and.callFake(() => {
       jasmine.fail();
       done();
     });
@@ -84,29 +86,29 @@ describe('resolver', function() {
     defer.resolve(['1.0.0', '2.0.0']);
   });
 
-  it('should fetch release', function(done) {
-    var d1 = Q.defer();
-    var p1 = d1.promise;
+  it('should fetch release', (done) => {
+    const d1 = Q.defer();
+    const p1 = d1.promise;
     spyOn(npmUtils, 'downloadTarball').and.returnValue(p1);
 
-    var d3 = Q.defer();
-    var p3 = d3.promise;
+    const d3 = Q.defer();
+    const p3 = d3.promise;
     spyOn(extract, 'tgz').and.returnValue(p3);
 
-    var d4 = Q.defer();
-    var p4 = d4.promise;
+    const d4 = Q.defer();
+    const p4 = d4.promise;
     spyOn(bowerUtils, 'patchConfiguration').and.returnValue(p4);
 
-    var source = 'npm:bower#~1.7.0';
-    var target = '1.7.7';
+    const source = 'npm:bower#~1.7.0';
+    const target = '1.7.7';
 
-    var result = resolver.fetch({
+    const result = resolver.fetch({
       source: source,
-      target: target
+      target: target,
     });
 
     // Fail if something bad happen.
-    result.catch(function() {
+    result.catch(() => {
       jasmine.fail();
     });
 
@@ -114,29 +116,29 @@ describe('resolver', function() {
     expect(npmUtils.downloadTarball).toHaveBeenCalledWith('bower', '1.7.7', jasmine.any(String));
     expect(extract.tgz).not.toHaveBeenCalled();
 
-    var tarballPath = '/tmp/bower.tgz';
-    var pkgPath = '/tmp/bower';
-    var bowerPkgPath = path.normalize(pkgPath + '/package');
+    const tarballPath = '/tmp/bower.tgz';
+    const pkgPath = '/tmp/bower';
+    const bowerPkgPath = path.normalize(pkgPath + '/package');
 
     d1.resolve(tarballPath);
 
-    p1.then(function() {
+    p1.then(() => {
       d3.resolve(pkgPath);
     });
 
-    p3.then(function() {
+    p3.then(() => {
       d4.resolve();
     });
 
     // Check final result.
-    result.then(function(result) {
+    result.then((result) => {
       expect(extract.tgz).toHaveBeenCalledWith(tarballPath, jasmine.any(String));
       expect(bowerUtils.patchConfiguration).toHaveBeenCalledWith(bowerPkgPath);
 
       expect(result).toBeDefined();
       expect(result).toEqual({
         tempPath: bowerPkgPath,
-        removeIgnores: true
+        removeIgnores: true,
       });
 
       done();

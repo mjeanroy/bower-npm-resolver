@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,123 +22,125 @@
  * SOFTWARE.
  */
 
-var fs = require('fs');
-var path = require('path');
-var tmp = require('tmp');
-var npmUtil = require('../src/npm-utils');
+'use strict';
 
-describe('npm-utils', function() {
-  var tmpDir;
-  var originalTimeout;
+const fs = require('fs');
+const path = require('path');
+const tmp = require('tmp');
+const npmUtil = require('../dist/npm-utils');
 
-  beforeEach(function() {
+describe('npm-utils', () => {
+  let tmpDir;
+  let originalTimeout;
+
+  beforeEach(() => {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     tmpDir = tmp.dirSync({
-      unsafeCleanup: true
+      unsafeCleanup: true,
     });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     tmpDir.removeCallback();
   });
 
-  it('should get list of releases', function(done) {
-    var promise = npmUtil.releases('bower', '1.7.7');
+  it('should get list of releases', (done) => {
+    const promise = npmUtil.releases('bower', '1.7.7');
     expect(promise).toBeDefined();
 
     promise
-      .then(function(releases) {
+      .then((releases) => {
         expect(releases.length).toBeGreaterThan(0);
         expect(releases).toContains('1.7.7');
       })
-      .catch(function() {
+      .catch(() => {
         jasmine.fail('Unable to get list of releases');
       })
-      .finally(function() {
+      .finally(() => {
         done();
       });
   });
 
-  it('should get tarball', function(done) {
-    var promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
+  it('should get tarball', (done) => {
+    const promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
     expect(promise).toBeDefined();
 
     promise
-      .then(function(path) {
+      .then((path) => {
         expect(path.length).toBeGreaterThan(0);
         expect(path).toContains('bower');
         expect(path).toContains('1.7.7');
       })
-      .catch(function() {
+      .catch(() => {
         jasmine.fail('Unable to download the tarball');
       })
-      .finally(function() {
+      .finally(() => {
         done();
       });
   });
 
-  it('should not change current working directory', function(done) {
-    var cwd = process.cwd();
-    var promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
+  it('should not change current working directory', (done) => {
+    const cwd = process.cwd();
+    const promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
 
     promise
-      .then(function(path) {
+      .then((path) => {
         expect(process.cwd()).toBe(cwd);
       })
-      .catch(function() {
+      .catch(() => {
         jasmine.fail('Unable to download the tarball');
       })
-      .finally(function() {
+      .finally(() => {
         done();
       });
   });
 
-  it('should get tarball with relative path', function(done) {
-    var newTmpDir = tmp.dirSync({
+  it('should get tarball with relative path', (done) => {
+    const newTmpDir = tmp.dirSync({
       unsafeCleanup: true,
-      dir: path.join(__dirname, '..')
+      dir: path.join(__dirname, '..'),
     });
 
-    var relativeToCwd = path.relative(process.cwd(), newTmpDir.name);
-    var expected = path.join(newTmpDir.name, 'bower-1.7.7.tgz');
+    const relativeToCwd = path.relative(process.cwd(), newTmpDir.name);
+    const expected = path.join(newTmpDir.name, 'bower-1.7.7.tgz');
 
-    var promise = npmUtil.downloadTarball('bower', '1.7.7', relativeToCwd);
+    const promise = npmUtil.downloadTarball('bower', '1.7.7', relativeToCwd);
 
     promise
-      .then(function(path) {
+      .then((path) => {
         expect(path).toBe(expected);
         expect(fs.statSync(path).isFile()).toBe(true);
       })
-      .catch(function() {
+      .catch(() => {
         jasmine.fail('Unable to download the tarball');
       })
-      .finally(function() {
+      .finally(() => {
         newTmpDir.removeCallback();
         done();
       });
   });
 
-  it('should get scoped package tarball', function(done) {
-    var expected = path.join(tmpDir.name, 'angular-core-2.0.0.tgz');
-    var promise = npmUtil.downloadTarball('@angular/core', '2.0.0', tmpDir.name);
+  it('should get scoped package tarball', (done) => {
+    const expected = path.join(tmpDir.name, 'angular-core-2.0.0.tgz');
+    const promise = npmUtil.downloadTarball('@angular/core', '2.0.0', tmpDir.name);
 
     promise
-      .then(function(path) {
+      .then((path) => {
         expect(path).toBe(expected);
         expect(fs.statSync(path).isFile()).toBe(true);
       })
-      .catch(function() {
+      .catch(() => {
         jasmine.fail('Unable to download the tarball');
       })
-      .finally(function() {
+      .finally(() => {
         done();
       });
   });

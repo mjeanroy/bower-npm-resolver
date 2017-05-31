@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,44 +22,46 @@
  * SOFTWARE.
  */
 
-var path = require('path');
-var fs = require('fs');
-var extract = require('../src/extract');
-var tmp = require('tmp');
+'use strict';
 
-describe('extract', function() {
-  var tmpDir;
-  var originalTimeout;
+const path = require('path');
+const fs = require('fs');
+const extract = require('../dist/extract');
+const tmp = require('tmp');
 
-  beforeEach(function() {
+describe('extract', () => {
+  let tmpDir;
+  let originalTimeout;
+
+  beforeEach(() => {
     tmpDir = tmp.dirSync({
-      unsafeCleanup: true
+      unsafeCleanup: true,
     });
 
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     tmpDir.removeCallback();
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
-  it('should extract tarball', function(done) {
-    var src = path.join(__dirname, 'bower-1.7.7.tgz');
-    var dst = tmpDir.name;
-    var promise = extract.tgz(src, dst);
+  it('should extract tarball', (done) => {
+    const src = path.join(__dirname, 'bower-1.7.7.tgz');
+    const dst = tmpDir.name;
+    const promise = extract.tgz(src, dst);
     expect(promise).toBeDefined();
 
     promise
-      .then(function(extracted) {
+      .then((extracted) => {
         expect(extracted).toBeDefined();
         expect(fs.statSync(extracted).isDirectory()).toBe(true);
       })
-      .catch(function() {
+      .catch(() => {
         jasmine.fail();
       })
-      .finally(function() {
+      .finally(() => {
         done();
       });
   });

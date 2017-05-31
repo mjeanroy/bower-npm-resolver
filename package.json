@@ -2,10 +2,12 @@
   "name": "bower-npm-resolver",
   "version": "0.7.0",
   "description": "Use npm as a registry for your Bower Dependencies",
-  "main": "src/resolver.js",
+  "main": "dist/resolver.js",
   "scripts": {
+    "clean": "gulp clean",
     "lint": "gulp lint",
     "test": "gulp test",
+    "build": "gulp build",
     "release": "gulp release",
     "release:patch": "gulp release:patch",
     "release:minor": "gulp release:minor",
@@ -40,10 +42,14 @@
     "fs-write-stream-atomic": "1.0.10"
   },
   "devDependencies": {
+    "babel-core": "6.24.1",
+    "babel-preset-es2015": "6.24.1",
+    "del": "2.2.2",
     "eslint": "3.19.0",
     "eslint-config-google": "0.7.1",
     "eslint-config-xo": "0.18.1",
     "gulp": "3.9.1",
+    "gulp-babel": "6.1.2",
     "gulp-bump": "2.7.0",
     "gulp-eslint": "3.0.1",
     "gulp-git": "2.2.0",

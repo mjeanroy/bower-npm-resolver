@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+'use strict';
+
 /**
  * This module is used as a wrapper for NPM commands.
  * Each functions will returned a promise:
@@ -29,16 +31,22 @@
  *  - Rejected with the error returned from NPM.
  */
 
-var requireg = require('requireg');
-var npm = requireg('npm');
+const requireg = require('requireg');
+const npm = requireg('npm');
 
-var Q = require('q');
-var path = require('path');
-var fs = require('fs');
-var writeStreamAtomic = require('fs-write-stream-atomic');
+const Q = require('q');
+const path = require('path');
+const fs = require('fs');
+const writeStreamAtomic = require('fs-write-stream-atomic');
 
-var wrapCallback = function(deferred) {
-  return function(err, data) {
+/**
+ * Wrap NodeJS callback style to a function that will resolve or reject a promise.
+ *
+ * @param {Object} deferred The deferred object that will be resolved/rejected.
+ * @return {function} The function that will resolve/reject the promise.
+ */
+function wrapCallback(deferred) {
+  return (err, data) => {
     if (err) {
       deferred.reject(err);
     } else {
@@ -47,10 +55,22 @@ var wrapCallback = function(deferred) {
   };
 };
 
-var execViewCommand = function(args) {
-  var deferred = Q.defer();
+/**
+ * Executes `npm view` command with passed arguments.
+ * Arguments is an array of `npm view` arguments.
+ * So if cmd command was `npm view bower@1.7.7`, then argument
+ * would be 'bower@1.7.7'.
+ *
+ * The returned promise will be resolved with the result of the cache command (i.e
+ * object with all informations about the package).
+ *
+ * @param {Array} args THe package to download.
+ * @return {Promise} The promise object
+ */
+function execViewCommand(args) {
+  const deferred = Q.defer();
 
-  npm.load(function(err) {
+  npm.load((err) => {
     if (err) {
       deferred.reject(err);
     } else {
@@ -64,8 +84,8 @@ var execViewCommand = function(args) {
 /**
  * Executes `npm cache-add` command with passed arguments.
  * Arguments is the name of the cache to download.
- * So if cmd command was `npm cache-add bower@1.7.7`, then argument
- * would be 'bower@1.7.7'.
+ * So if cmd command was `npm cache-add bower@1.7.7 versions`, then argument
+ * would be `['bower@1.7.7', 'versions']`.
  *
  * The returned promise will be resolved with the result of the cache command (i.e
  * object with all informations about the package).
@@ -73,10 +93,10 @@ var execViewCommand = function(args) {
  * @param {Array} pkg THe package to download.
  * @return {Promise} The promise object
  */
-var execCacheCommand = function(pkg) {
-  var deferred = Q.defer();
+function execCacheCommand(pkg) {
+  const deferred = Q.defer();
 
-  npm.load(function(err) {
+  npm.load((err) => {
     if (err) {
       deferred.reject(err);
     } else {
@@ -87,8 +107,14 @@ var execCacheCommand = function(pkg) {
   return deferred.promise;
 };
 
-var getLastKey = function(o) {
-  var keys = Object.keys(o);
+/**
+ * Returns the last key (in alpha-numeric order) of an object.
+ *
+ * @param {Object} o The object.
+ * @return {string} The last key.
+ */
+function getLastKey(o) {
+  const keys = Object.keys(o);
   keys.sort();
   return keys[keys.length - 1];
 };
@@ -109,15 +135,15 @@ module.exports = {
    * @param {String} pkg The package name.
    * @return {Promise} The promise object.
    */
-  releases: function(pkg) {
-    return execViewCommand([pkg, 'versions']).then(function(data) {
+  releases(pkg) {
+    return execViewCommand([pkg, 'versions']).then((data) => {
       // If it is already an array, return it.
       if (Array.isArray(data)) {
         return data;
       }
 
       // Otherwise, unwrap it.
-      var mostRecentVersion = getLastKey(data);
+      const mostRecentVersion = getLastKey(data);
       return data[mostRecentVersion].versions;
     });
   },
@@ -134,39 +160,39 @@ module.exports = {
    * @param {String} [dir] Tarball download location.
    * @return {Promise} The promise object.
    */
-  downloadTarball: function(pkg, version, dir) {
-    var deferred = Q.defer();
+  downloadTarball(pkg, version, dir) {
+    const deferred = Q.defer();
 
-    execCacheCommand(pkg + '@' + version)
-      .then(function(data) {
+    execCacheCommand(`${pkg}@${version}`)
+      .then((data) => {
         // The original `pack` command does not support custom directory output.
         // So, to avoid to change the current working directory pointed by `process.cwd()` (i.e
         // to avoid side-effect), we just copy the file manually.
         // This is basically what is done by `npm pack` command.
         // See: https://github.com/npm/npm/issues/4074
         // See: https://github.com/npm/npm/blob/v3.10.8/lib/pack.js#L49
-        var targetDir = path.resolve(dir);
-        var tarball = path.resolve(npm.cache, data.name, data.version, 'package.tgz');
+        const targetDir = path.resolve(dir);
+        const tarball = path.resolve(npm.cache, data.name, data.version, 'package.tgz');
 
-        var name = data.name;
+        let name = data.name;
 
         // scoped packages get special treatment
         if (name[0] === '@') {
           name = name.substr(1).replace(/\//g, '-');
         }
 
-        var fileName = name + '-' + data.version + '.tgz';
+        const fileName = `${name}-${data.version}.tgz`;
 
-        var outputFile = path.join(targetDir, fileName);
-        var inputStream = fs.createReadStream(tarball);
-        var outputStream = writeStreamAtomic(outputFile);
+        const outputFile = path.join(targetDir, fileName);
+        const inputStream = fs.createReadStream(tarball);
+        const outputStream = writeStreamAtomic(outputFile);
 
         // Handle errors.
         inputStream.on('error', deferred.reject);
         outputStream.on('error', deferred.reject);
 
         // Handle success.
-        outputStream.on('close', function() {
+        outputStream.on('close', () => {
           deferred.resolve(outputFile);
         });
 
@@ -174,5 +200,5 @@ module.exports = {
       });
 
     return deferred.promise;
-  }
+  },
 };

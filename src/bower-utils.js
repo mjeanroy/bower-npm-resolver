@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+'use strict';
+
 /**
  * This module is used as a wrapper for NPM commands.
  * Each functions will returned a promise:
@@ -29,15 +31,22 @@
  *  - Rejected with the error returned from NPM.
  */
 
-var path = require('path');
-var fs = require('fs');
-var Q = require('q');
-var _ = require('underscore');
+const path = require('path');
+const fs = require('fs');
+const Q = require('q');
+const _ = require('underscore');
 
-var isFile = function(path) {
-  var deferred = Q.defer();
+/**
+ * Check that a given path is a valid file and returns a promise
+ * that is resolved if the path is a file and rejected if not.
+ *
+ * @param {string} path The path to check.
+ * @return {Promise} The promise.
+ */
+function isFile(path) {
+  const deferred = Q.defer();
 
-  fs.stat(path, function(err, stat) {
+  fs.stat(path, (err, stat) => {
     if (err || !stat.isFile()) {
       deferred.reject();
     } else {
@@ -49,19 +58,19 @@ var isFile = function(path) {
 };
 
 module.exports = {
-  patchConfiguration: function(pkg) {
-    var deferred = Q.defer();
-    var bowerJson = path.join(pkg, 'bower.json');
+  patchConfiguration(pkg) {
+    const deferred = Q.defer();
+    const bowerJson = path.join(pkg, 'bower.json');
 
     isFile(bowerJson)
       .then(deferred.resolve)
-      .catch(function() {
-        fs.readFile(path.join(pkg, 'package.json'), 'utf8', function(err, data) {
+      .catch(() => {
+        fs.readFile(path.join(pkg, 'package.json'), 'utf8', (err, data) => {
           if (err) {
-            deferred.reject('Could not read package.json from ', pkg);
+            deferred.reject(`Could not read package.json from ${pkg}`);
           } else {
-            var config = JSON.parse(data);
-            var newConfig = _.pick(config, [
+            const config = JSON.parse(data);
+            const newConfig = _.pick(config, [
               'name',
               'description',
               'main',
@@ -73,7 +82,7 @@ module.exports = {
               'private',
               'homepage',
               'bugs',
-              'repository'
+              'repository',
             ]);
 
             // scoped packages get special treatment
@@ -87,9 +96,9 @@ module.exports = {
             newConfig.dependencies = {};
             newConfig.devDependencies = {};
 
-            fs.writeFile(bowerJson, JSON.stringify(newConfig, null, 2), 'utf-8', function(err) {
+            fs.writeFile(bowerJson, JSON.stringify(newConfig, null, 2), 'utf-8', (err) => {
               if (err) {
-                deferred.reject('Could not write bower.json file to ' + pkg);
+                deferred.reject(`Could not write bower.json file to ${pkg}`);
               } else {
                 deferred.resolve();
               }
@@ -99,5 +108,5 @@ module.exports = {
       });
 
     return deferred.promise;
-  }
+  },
 };

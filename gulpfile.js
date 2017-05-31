@@ -22,61 +22,79 @@
  * SOFTWARE.
  */
 
-var fs = require('fs');
-var path = require('path');
-var gulp = require('gulp');
-var jasmine = require('gulp-jasmine');
-var bump = require('gulp-bump');
-var gutil = require('gulp-util');
-var git = require('gulp-git');
-var runSequence = require('run-sequence');
-var eslint = require('gulp-eslint');
+const path = require('path');
+const gulp = require('gulp');
+const babel = require('gulp-babel');
+const jasmine = require('gulp-jasmine');
+const bump = require('gulp-bump');
+const gutil = require('gulp-util');
+const git = require('gulp-git');
+const del = require('del');
+const runSequence = require('run-sequence');
+const eslint = require('gulp-eslint');
 
-gulp.task('lint', function() {
-  var srcFiles = path.join(__dirname, 'src/**/*.js');
-  var testFiles = path.join(__dirname, 'test/**/*.js');
-  return gulp.src([srcFiles, testFiles])
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
+const ROOT = __dirname;
+const SRC = path.join(ROOT, 'src');
+const TEST = path.join(ROOT, 'test');
+const DIST = path.join(ROOT, 'dist');
+const PKG = path.join(ROOT, 'package.json');
+
+gulp.task('clean', () => {
+  return del(DIST);
 });
 
-gulp.task('test', function() {
-  return gulp.src(path.join(__dirname, 'test/*.js'))
-    .pipe(jasmine());
+gulp.task('lint', () => {
+  const src = [
+    path.join(SRC, '**', '*.js'),
+    path.join(TEST, '**', '*.js'),
+    path.join(ROOT, '*.js'),
+  ];
+
+  return gulp.src(src)
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
 
-gulp.task('bump', ['bump:patch'], function() {
-  return gulp.src(path.join(__dirname, 'package.json'))
-    .pipe(bump({type: 'patch'}).on('error', gutil.log))
-    .pipe(gulp.dest('./'));
+gulp.task('build', ['clean', 'lint'], () => {
+  return gulp.src(path.join(SRC, '**', '*.js'))
+    .pipe(babel())
+    .pipe(gulp.dest(DIST));
 });
 
-gulp.task('commit', function() {
-  return gulp.src('.')
-    .pipe(git.add())
-    .pipe(git.commit('release: bumped version number'));
+gulp.task('test', ['build'], () => {
+  return gulp.src(path.join(TEST, '*.js')).pipe(jasmine());
 });
 
-gulp.task('tag', function(done) {
-  var pkg = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8');
-  var version = JSON.parse(pkg).version;
-  git.tag('v' + version, 'release: tag version ' + version, done);
+gulp.task('pretag', () => {
+  return gulp.src([PKG_JSON, DIST])
+    .pipe(git.add({args: '-f'}))
+    .pipe(git.commit('release: release version'));
 });
 
-['major', 'minor', 'patch'].forEach(function(level) {
-  gulp.task('bump:' + level, function() {
-    return gulp.src(path.join(__dirname, 'package.json'))
+gulp.task('posttag', () => {
+  return gulp.src(DIST)
+    .pipe(git.rm({args: '-r'}))
+    .pipe(git.commit('release: prepare next release'));
+});
+
+gulp.task('tag', (done) => {
+  const version = require(PKG).version;
+  git.tag(`v${version}`, `release: tag version ${version}`, done);
+});
+
+['major', 'minor', 'patch'].forEach((level) => {
+  gulp.task(`bump:${level}`, () => {
+    return gulp.src(PKG)
       .pipe(bump({type: level})
       .on('error', gutil.log))
-      .pipe(gulp.dest('.'));
+      .pipe(gulp.dest(ROOT));
   });
 
-  gulp.task('release:' + level, function() {
-    runSequence('bump:' + level, 'commit', 'tag');
+  gulp.task(`release:${level}`, ['build'], () => {
+    runSequence(`bump:${level}`, 'pretag', 'tag', 'posttag');
   });
 });
 
 // Default release task.
 gulp.task('release', ['release:patch']);
-

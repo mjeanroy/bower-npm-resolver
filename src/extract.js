@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+'use strict';
+
 /**
  * This module will extract an NPM package into
  * a destination directory.
@@ -30,14 +32,20 @@
  * - Extract it.
  */
 
-var fs = require('fs');
-var zlib = require('zlib');
-var tar = require('tar-fs');
-var Q = require('q');
+const fs = require('fs');
+const zlib = require('zlib');
+const tar = require('tar-fs');
+const Q = require('q');
 
-var isSymlink = function(file) {
+/**
+ * Check that the given file is a symbolic link.
+ *
+ * @param {Object} file The file to check.
+ * @return {boolean} `true` if the file is a symbolic link, `false` otherwise.
+ */
+function isSymlink(file) {
   return file.type === 'SymbolicLink';
-};
+}
 
 module.exports = {
   /**
@@ -53,8 +61,8 @@ module.exports = {
    * @param {String} dst Destination directory.
    * @return {Promise} The promise.
    */
-  tgz: function(src, dst) {
-    var deferred = Q.defer();
+  tgz(src, dst) {
+    const deferred = Q.defer();
 
     fs.createReadStream(src)
       .on('error', deferred.reject)
@@ -65,5 +73,5 @@ module.exports = {
       .on('finish', deferred.resolve.bind(deferred, dst));
 
     return deferred.promise;
-  }
+  },
 };

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mathieu Hofman
+ * Copyright (c) 2016-2017 Mathieu Hofman
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 
-var matcherUtils = require('../src/matcher-utils');
+'use strict';
+
+const matcherUtils = require('../dist/matcher-utils');
 
 /**
  * Iterate over object keys and trigger callback for each entry.
@@ -30,14 +32,14 @@ var matcherUtils = require('../src/matcher-utils');
  * @param {function} callback Iteration callback.
  */
 function forEachObjectAsMap(obj, callback) {
-  Object.keys(obj).forEach(function(key) {
+  Object.keys(obj).forEach((key) => {
     callback(obj[key], key, obj);
   });
 }
 
-describe('matcher-utils', function() {
-  it('should match npm source by default', function() {
-    var matchers = matcherUtils.getFromConfig();
+describe('matcher-utils', () => {
+  it('should match npm source by default', () => {
+    const matchers = matcherUtils.getFromConfig();
 
     expect(matchers.test('npm+test')).toBe(true);
     expect(matchers.test('npm:test')).toBe(true);
@@ -46,10 +48,10 @@ describe('matcher-utils', function() {
     expect(matchers.test('test')).toBe(false);
   });
 
-  describe('should match only valid variations of npm scheme.', function() {
-    var matchers = matcherUtils.getFromConfig();
+  describe('should match only valid variations of npm scheme.', () => {
+    const matchers = matcherUtils.getFromConfig();
 
-    it('accepts valid URIs', function() {
+    it('accepts valid URIs', () => {
       // a urn type URI (no authority) where package name is the whole path
       expect(matchers.test('npm:test')).toBe(true);
 
@@ -66,7 +68,7 @@ describe('matcher-utils', function() {
       expect(matchers.test('NPM:test')).toBe(true);
     });
 
-    it('accepts invalid, yet common URIs', function() {
+    it('accepts invalid, yet common URIs', () => {
       // URI where the package name is the authority
       expect(matchers.test('npm://test')).toBe(true);
 
@@ -74,7 +76,7 @@ describe('matcher-utils', function() {
       expect(matchers.test('npm://@scope/test')).toBe(true);
     });
 
-    it('rejects invalid URIs', function() {
+    it('rejects invalid URIs', () => {
       // Path has too many slashes
       expect(matchers.test('npm:////test')).toBe(false);
     });
@@ -82,58 +84,58 @@ describe('matcher-utils', function() {
 
   forEachObjectAsMap({
     'string': {
-      match: '^mycompany'
+      match: '^mycompany',
     },
     'RegExp': {
-      match: /^mycompany/
+      match: /^mycompany/,
     },
     'object': {
       match: {
-        pattern: '^mycompany'
-      }
+        pattern: '^mycompany',
+      },
     },
     'object with prefix': {
       match: {
-        prefix: 'mycompany'
-      }
+        prefix: 'mycompany',
+      },
     },
     'object with replace=false': {
       match: {
         pattern: '^mycompany',
-        replace: false
-      }
+        replace: false,
+      },
     },
     'array': {
       match: [
         '^myothercompany',
-        '^mycompany'
-      ]
+        '^mycompany',
+      ],
     },
     'matchPrefix': {
       matchPrefix: 'mycompany',
-      stripPrefix: false
-    }
-  }, function(config, type) {
-    var matchers;
+      stripPrefix: false,
+    },
+  }, (config, type) => {
+    let matchers;
 
-    it('should parse config when pattern passed as a ' + type, function() {
+    it(`should parse config when pattern passed as a ${type}`, () => {
       matchers = matcherUtils.getFromConfig(config);
       expect(matchers).toBeDefined();
     });
 
-    it('should match a custom pattern passed as a ' + type, function() {
+    it(`should match a custom pattern passed as a ${type}`, () => {
       expect(matchers.test('mycompany-test')).toBe(true);
       expect(matchers.test('test')).toBe(false);
     });
 
     if (type !== 'matchPrefix') {
-      it('should keep matching defaults when custom pattern passed as a ' + type, function() {
+      it(`should keep matching defaults when custom pattern passed as a ${type}`, () => {
         expect(matchers.test('npm:test')).toBe(true);
         expect(matchers.test('npm+test')).toBe(true);
       });
     }
 
-    it('should not replace from custom pattern passed as a ' + type, function() {
+    it(`should not replace from custom pattern passed as a ${type}`, () => {
       expect(matchers.exec('mycompany-test')).toEqual('mycompany-test');
     });
   });
@@ -142,37 +144,37 @@ describe('matcher-utils', function() {
     'replace=true': {
       match: {
         prefix: 'mycompany-',
-        replace: true
-      }
+        replace: true,
+      },
     },
     'replace with empty string': {
       match: {
         pattern: '^mycompany-',
-        replace: ''
-      }
+        replace: '',
+      },
     },
     'replace with string': {
       match: {
         pattern: '^mycompany-te',
-        replace: 'te'
-      }
+        replace: 'te',
+      },
     },
     'replace with regexp result': {
       match: {
         pattern: '^mycompany-(test)',
-        replace: '$1'
-      }
+        replace: '$1',
+      },
     },
     'matchPrefix': {
-      matchPrefix: 'mycompany-'
+      matchPrefix: 'mycompany-',
     },
     'matchPrefix with stripPrefix=true': {
       matchPrefix: 'mycompany-',
-      stripPrefix: true
-    }
-  }, function(config, type) {
-    it('should strip/replace when ' + type, function() {
-      var matchers = matcherUtils.getFromConfig(config);
+      stripPrefix: true,
+    },
+  }, (config, type) => {
+    it(`should strip/replace when ${type}`, () => {
+      const matchers = matcherUtils.getFromConfig(config);
 
       expect(matchers.exec('mycompany-test')).toEqual('test');
     });
@@ -181,24 +183,24 @@ describe('matcher-utils', function() {
   forEachObjectAsMap({
     'ignoreMatchDefaults=true': {
       match: '^mycompany',
-      ignoreMatchDefaults: true
+      ignoreMatchDefaults: true,
     },
     'matchPrefix': {
-      matchPrefix: 'mycompany'
-    }
-  }, function(config, type) {
-    it('should ignore the defaults when ' + type, function() {
-      var matchers = matcherUtils.getFromConfig(config);
+      matchPrefix: 'mycompany',
+    },
+  }, (config, type) => {
+    it(`should ignore the defaults when ${type}`, () => {
+      const matchers = matcherUtils.getFromConfig(config);
 
       expect(matchers.test('npm:test')).toBe(false);
       expect(matchers.test('npm+test')).toBe(false);
     });
   });
 
-  it('should not match anything with an empty match list', function() {
-    var matchers = matcherUtils.getFromConfig({
+  it('should not match anything with an empty match list', () => {
+    const matchers = matcherUtils.getFromConfig({
       match: [],
-      ignoreMatchDefaults: true
+      ignoreMatchDefaults: true,
     });
 
     expect(matchers.test('test')).toBe(false);

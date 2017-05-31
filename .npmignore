@@ -1,5 +1,11 @@
 # NPM modules
 node_modules/
 
-# Do not send test directory
-test/
+# Do not dev files
+/test/
+/src/
+/gulpfile.js
+/.eslintrc.json
+/.babelrc
+/.travis.yml
+/.gitattributes

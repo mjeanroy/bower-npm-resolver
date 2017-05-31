@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mickael Jeanroy
+ * Copyright (c) 2016-2017 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,25 @@
  * SOFTWARE.
  */
 
+'use strict';
+
 /**
  * Factory function for the resolver.
  * Will be called only one time by Bower, to instantiate resolver.
  */
 
-var mkdirp = require('mkdirp');
-var path = require('path');
-var npmUtils = require('./npm-utils');
-var extract = require('./extract');
-var bowerUtils = require('./bower-utils');
-var matcherUtils = require('./matcher-utils');
+const mkdirp = require('mkdirp');
+const path = require('path');
+const npmUtils = require('./npm-utils');
+const extract = require('./extract');
+const bowerUtils = require('./bower-utils');
+const matcherUtils = require('./matcher-utils');
 
 module.exports = function resolver(bower) {
-  var logger = bower.logger;
+  const logger = bower.logger;
 
   // Read configuration passed via .bowerrc
-  var matchers = matcherUtils.getFromConfig(bower.config.bowerNpmResolver);
+  const matchers = matcherUtils.getFromConfig(bower.config.bowerNpmResolver);
   logger.debug('npm-resolver', 'found matchers: ' + JSON.stringify(matchers));
 
   /**
@@ -49,16 +51,14 @@ module.exports = function resolver(bower) {
    * @param {string} source Source read from `bower.json` file.
    * @return {string} Package name extracted from given source.
    */
-  var extractPackageName = function(source) {
-    var matchedSource = matchers.exec(source);
-    var withoutVersion = matchedSource.split('#')[0];
-
+  function extractPackageName(source) {
+    const matchedSource = matchers.exec(source);
+    const withoutVersion = matchedSource.split('#')[0];
     return withoutVersion;
   };
 
   // Resolver factory returns an instance of resolver
   return {
-
     /**
      * Match method tells whether resolver supports given source.
      * The resolver matches entries whose package value in `bower.json` starts with `npm:` string.
@@ -66,8 +66,8 @@ module.exports = function resolver(bower) {
      * @param {string} source Source from `bower.json`.
      * @return {boolean} `true` if source match this resolver, `false` otherwise.
      */
-    match: function(source) {
-      logger.debug('npm-resolver', 'checking for: ' + source);
+    match(source) {
+      logger.debug('npm-resolver', `checking for: ${source}`);
       return matchers.test(source);
     },
 
@@ -79,19 +79,17 @@ module.exports = function resolver(bower) {
      * @param {string} source Source from `bower.json`.
      * @return {Promise} Promise resolved with available releases versions.
      */
-    releases: function(source) {
-      logger.debug('npm-resolver', 'extracting package name from: ' + source);
-      var pkg = extractPackageName(source);
+    releases(source) {
+      logger.debug('npm-resolver', `extracting package name from: ${source}`);
+      const pkg = extractPackageName(source);
 
-      logger.debug('npm-resolver', 'fetching releases information from: ' + pkg);
-      return npmUtils.releases(pkg).then(function(versions) {
-        logger.debug('npm-resolver', 'found releases: ' + versions);
-        return versions.map(function(v) {
-          return {
-            target: v,
-            version: v
-          };
-        });
+      logger.debug('npm-resolver', `fetching releases information from: ${pkg}`);
+      return npmUtils.releases(pkg).then((versions) => {
+        logger.debug('npm-resolver', `found releases: ${versions}`);
+        return versions.map((v) => ({
+          target: v,
+          version: v,
+        }));
       });
     },
 
@@ -117,45 +115,44 @@ module.exports = function resolver(bower) {
      * @return {Promise} Promise object.
      * @see http://bower.io/docs/pluggable-resolvers/#resolverfetch
      */
-    fetch: function(endpoint, cached) {
-      logger.debug('npm-resolver', 'fetching: ' + JSON.stringify(endpoint));
+    fetch(endpoint, cached) {
+      logger.debug('npm-resolver', `fetching: ${JSON.stringify(endpoint)}`);
 
       // If cached version of package exists, re-use it
       if (cached && cached.version) {
         return undefined;
       }
 
-      logger.debug('npm-resolver', 'extracting package name from: ' + endpoint.source);
-      var pkg = extractPackageName(endpoint.source);
+      logger.debug('npm-resolver', `extracting package name from: ${endpoint.source}`);
+      const pkg = extractPackageName(endpoint.source);
+      const storage = bower.config.storage.packages;
 
       // Directory where the tgz will be stored.
-      var compressedDir = path.join(bower.config.storage.packages, 'npm-resolver/compressed');
+      const compressedDir = path.join(storage, 'npm-resolver/compressed');
       mkdirp.sync(compressedDir);
 
       // Directory where the tgz file will be extracted.
-      var uncompressedDir = path.join(bower.config.storage.packages, 'npm-resolver/uncompressed', pkg, endpoint.target);
+      const uncompressedDir = path.join(storage, 'npm-resolver/uncompressed', pkg, endpoint.target);
       mkdirp.sync(uncompressedDir);
 
-      logger.debug('npm-resolver', 'downloading tarball for: ' + pkg + '#' + endpoint.target);
+      logger.debug('npm-resolver', `downloading tarball for: ${pkg}#${endpoint.target}`);
       return npmUtils.downloadTarball(pkg, endpoint.target, compressedDir)
 
         // Download ok, extract tarball.
-        .then(function(tarballPath) {
-          logger.debug('npm-resolver', 'extracting tarball from: "' + tarballPath + '" to "' + uncompressedDir);
+        .then((tarballPath) => {
+          logger.debug('npm-resolver', `extracting tarball from: "${tarballPath}" to "${uncompressedDir}`);
           return extract.tgz(tarballPath, uncompressedDir);
         })
 
         // Patch configuration with `package.json` file if `bower.json` does not exist.
-        .then(function(dir) {
-          var pkgPath = path.join(dir, 'package');
-          logger.debug('npm-resolver', 'extracting and patching bower.json from: ' + pkgPath);
-          return bowerUtils.patchConfiguration(pkgPath).then(function() {
-            return {
-              tempPath: pkgPath,
-              removeIgnores: true
-            };
-          });
+        .then((dir) => {
+          const pkgPath = path.join(dir, 'package');
+          logger.debug('npm-resolver', `extracting and patching bower.json from: ${pkgPath}`);
+          return bowerUtils.patchConfiguration(pkgPath).then(() => ({
+            tempPath: pkgPath,
+            removeIgnores: true,
+          }));
         });
-    }
+    },
   };
 };

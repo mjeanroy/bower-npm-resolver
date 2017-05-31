@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Mathieu Hofman
+ * Copyright (c) 2016-2017 Mathieu Hofman
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,41 +22,49 @@
  * SOFTWARE.
  */
 
+'use strict';
+
 /**
  * This module is used to parse the config and generate matchers.
  */
 
-var escapeStringRegexp = require('escape-string-regexp');
+const escapeStringRegexp = require('escape-string-regexp');
 
 /**
  * Matcher that tests a source against a regexp
  * and replaces the match to produce a clean source
- * @param {RegExp} regexp A regular expression to match against
- * @param {string?} replace A string to replace the match with if necessary
  * @constructor
  */
-function Matcher(regexp, replace) {
-  this.regexp = regexp;
-  this.replace = replace;
+class Matcher {
+  /**
+   * Create the matcher.
+   * @param {RegExp} regexp A regular expression to match against
+   * @param {string?} replace A string to replace the match with if necessary
+   * @constructor
+   */
+  constructor(regexp, replace) {
+    this.regexp = regexp;
+    this.replace = replace;
+  }
+
+  /**
+   * Test the matcher against the source
+   * @param {string} source Source
+   * @return {boolean} Match result
+   */
+  test(source) {
+    return this.regexp.test(source);
+  }
+
+  /**
+   * Executes the matcher against the source
+   * @param {string} source Source
+   * @return {string} Cleaned up result
+   */
+  exec(source) {
+    return this.replace === undefined ? source : source.replace(this.regexp, this.replace);
+  }
 }
-
-/**
- * Test the matcher against the source
- * @param {string} source Source
- * @return {boolean} Match result
- */
-Matcher.prototype.test = function(source) {
-  return this.regexp.test(source);
-};
-
-/**
- * Executes the matcher against the source
- * @param {string} source Source
- * @return {string} Cleaned up result
- */
-Matcher.prototype.exec = function(source) {
-  return this.replace === undefined ? source : source.replace(this.regexp, this.replace);
-};
 
 /**
  * Test if any matcher in the list matches against the source
@@ -65,9 +73,7 @@ Matcher.prototype.exec = function(source) {
  * @return {boolean} Match result
  */
 function matchersTest(source) {
-  return this.some(function(matcher) {
-    return matcher.test(source);
-  });
+  return this.some((matcher) => matcher.test(source));
 }
 
 /**
@@ -77,16 +83,13 @@ function matchersTest(source) {
  * @return {string} Cleaned up result
  */
 function matchersExec(source) {
-  var matcher = this.reduce(function(matcher, newMatcher) {
-    return matcher || (newMatcher.test(source) ? newMatcher : null);
-  }, null);
-
+  const matcher = this.reduce((matcher, newMatcher) => matcher || (newMatcher.test(source) ? newMatcher : null), null);
   return matcher.exec(source);
 }
 
-var NPM_SCHEME_PATTERN = '^npm:/{0,3}(?!/)';
-// var NPM_SCHEME_PATTERN_VALID_ONLY = '^npm:(?:/?|///)(?!\\/)';
-var NPM_PREFIX = 'npm+';
+const NPM_SCHEME_PATTERN = '^npm:/{0,3}(?!/)';
+// const NPM_SCHEME_PATTERN_VALID_ONLY = '^npm:(?:/?|///)(?!\\/)';
+const NPM_PREFIX = 'npm+';
 
 /**
  * Creates a list of matchers from the config, providing default matchers if necessary
@@ -97,7 +100,7 @@ var NPM_PREFIX = 'npm+';
 exports.getFromConfig = function getFromConfig(config) {
   config = config || {};
 
-  var patterns = config.match || [];
+  let patterns = config.match || [];
 
   if (typeof patterns !== 'object' || !Array.isArray(patterns)) {
     patterns = [patterns];
@@ -109,8 +112,8 @@ exports.getFromConfig = function getFromConfig(config) {
       config.ignoreMatchDefaults = true;
     }
     patterns.unshift({
-      pattern: '^' + escapeStringRegexp(config.matchPrefix),
-      replace: ('stripPrefix' in config) ? Boolean(config.stripPrefix) : true
+      pattern: `^${escapeStringRegexp(config.matchPrefix)}`,
+      replace: ('stripPrefix' in config) ? Boolean(config.stripPrefix) : true,
     });
   }
 
@@ -118,24 +121,24 @@ exports.getFromConfig = function getFromConfig(config) {
     patterns.push({
       pattern: NPM_SCHEME_PATTERN,
       flags: 'i',
-      replace: true
+      replace: true,
     });
     patterns.push({
       prefix: NPM_PREFIX,
-      replace: true
+      replace: true,
     });
   }
 
-  var matchers = patterns.map(function(pattern) {
+  const matchers = patterns.map((pattern) => {
     if (typeof pattern === 'string') {
       pattern = {
-        pattern: pattern
+        pattern,
       };
     }
 
     if (pattern instanceof RegExp) {
       pattern = {
-        regexp: pattern
+        regexp: pattern,
       };
     }
 
@@ -143,10 +146,10 @@ exports.getFromConfig = function getFromConfig(config) {
       throw new Error('Invalid match value: ' + pattern);
     }
 
-    var patternString = pattern.pattern || (pattern.prefix ? '^' + escapeStringRegexp(pattern.prefix) : null);
+    const patternString = pattern.pattern || (pattern.prefix ? `^${escapeStringRegexp(pattern.prefix)}` : null);
 
-    var regexp = pattern.regexp || new RegExp(patternString, pattern.flags);
-    var replace;
+    const regexp = pattern.regexp || new RegExp(patternString, pattern.flags);
+    let replace;
 
     if (pattern.replace === true) {
       replace = '';
@@ -164,4 +167,3 @@ exports.getFromConfig = function getFromConfig(config) {
 
   return matchers;
 };
-
