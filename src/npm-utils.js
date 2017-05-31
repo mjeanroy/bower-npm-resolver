@@ -31,7 +31,6 @@
  *  - Rejected with the error returned from NPM.
  */
 
-const _ = require('lodash');
 const requireg = require('requireg');
 const npm = requireg('npm');
 const Q = require('q');
@@ -49,11 +48,11 @@ const writeStreamAtomic = require('fs-write-stream-atomic');
 function execNpm(cb) {
   const deferred = Q.defer();
 
-  npm.load((err) => {
+  npm.load((err, meta) => {
     if (err) {
       deferred.reject(err);
     } else {
-      cb(deferred);
+      cb(meta, deferred);
     }
   });
 
@@ -73,7 +72,7 @@ function execNpm(cb) {
  * @return {Promise} The promise object
  */
 function execViewCommand(args) {
-  return execNpm((deferred) => {
+  return execNpm((meta, deferred) => {
     npm.commands.view(args, true, (err, data) => {
       if (err) {
         deferred.reject(err);
@@ -97,21 +96,70 @@ function execViewCommand(args) {
  * @return {Promise} The promise object
  */
 function execCacheCommand(pkg) {
-  return execNpm((deferred) => {
-    const cb = _.once((err, data) => {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve(data);
-      }
-    });
-
-    // NPM >= 5.0.0 now returns a promise instead of using last parameter as a callback
-    const result = npm.commands.cache.add(pkg, null, null, false, cb);
-    if (result && _.isFunction(result.then) && _.isFunction(result.catch)) {
-      result.then((data) => cb(null, data.manifest)).catch((err) => cb(err, null));
+  return execNpm((meta, deferred) => {
+    if (require('semver').lt(meta.version, '5.0.0')) {
+      oldNpmCache(pkg, deferred);
+    } else {
+      newNpmCache(pkg, deferred);
     }
   });
+}
+
+/**
+ * Run npm cache command and resolve the deferred object with the returned
+ * metadata.
+ *
+ * @param {string} pkg NPM Package id (i.e `bower@1.8.0`).
+ * @param {Object} deferred The deferred object to resolve.
+ * @return {void}
+ */
+function oldNpmCache(pkg, deferred) {
+  npm.commands.cache.add(pkg, null, null, false, (err, data) => {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      const name = data.name;
+      const version = data.version;
+      const tarball = path.resolve(npm.cache, name, version, 'package.tgz');
+      const inputStream = fs.createReadStream(tarball);
+      deferred.resolve({name, version, inputStream});
+    }
+  });
+}
+
+/**
+ * Run npm cache command and resolve the deferred object with the returned
+ * metadata.
+ *
+ * @param {string} pkg NPM Package id (i.e `bower@1.8.0`).
+ * @param {Object} deferred The deferred object to resolve.
+ * @return {void}
+ */
+function newNpmCache(pkg, deferred) {
+  npm.commands.cache.add(pkg)
+    .then((info) => {
+      const manifest = info.manifest;
+      const name = manifest.name;
+      const version = manifest.version;
+      const cache = path.join(npm.cache, '_cacache');
+      const inputStream = require('cacache').get.stream.byDigest(cache, info.integrity);
+      deferred.resolve({name, version, inputStream});
+    })
+    .catch((err) => {
+      deferred.reject(err);
+    });
+}
+
+/**
+ * Normalize NPM package name:
+ * - For a scope package, remove the first `@` charachter and replace `/` with `-`.
+ * - For a non scoped package, return the original name.
+ *
+ * @param {string} name The NPM package name.
+ * @return {string} The normalized package name.
+ */
+function normalizePkgName(name) {
+  return name[0] === '@' ? name.substr(1).replace(/\//g, '-') : name;
 }
 
 /**
@@ -124,7 +172,7 @@ function getLastKey(o) {
   const keys = Object.keys(o);
   keys.sort();
   return keys[keys.length - 1];
-};
+}
 
 module.exports = {
 
@@ -171,32 +219,29 @@ module.exports = {
     const deferred = Q.defer();
 
     execCacheCommand(`${pkg}@${version}`)
-      .then((data) => {
+      .then((result) => {
         // The original `pack` command does not support custom directory output.
         // So, to avoid to change the current working directory pointed by `process.cwd()` (i.e
         // to avoid side-effect), we just copy the file manually.
         // This is basically what is done by `npm pack` command.
         // See: https://github.com/npm/npm/issues/4074
         // See: https://github.com/npm/npm/blob/v3.10.8/lib/pack.js#L49
+        const inputStream = result.inputStream;
+
         const targetDir = path.resolve(dir);
-        const tarball = path.resolve(npm.cache, data.name, data.version, 'package.tgz');
-
-        let name = data.name;
-
-        // scoped packages get special treatment
-        if (name[0] === '@') {
-          name = name.substr(1).replace(/\//g, '-');
-        }
-
-        const fileName = `${name}-${data.version}.tgz`;
-
+        const name = normalizePkgName(result.name);
+        const fileName = `${name}-${result.version}.tgz`;
         const outputFile = path.join(targetDir, fileName);
-        const inputStream = fs.createReadStream(tarball);
         const outputStream = writeStreamAtomic(outputFile);
 
         // Handle errors.
-        inputStream.on('error', deferred.reject);
-        outputStream.on('error', deferred.reject);
+        inputStream.on('error', (err) => {
+          deferred.reject(err);
+        });
+
+        outputStream.on('error', (err) => {
+          deferred.reject(err);
+        });
 
         // Handle success.
         outputStream.on('close', () => {
@@ -204,9 +249,6 @@ module.exports = {
         });
 
         inputStream.pipe(outputStream);
-      })
-      .catch((err) => {
-        console.log('err: ', err);
       });
 
     return deferred.promise;

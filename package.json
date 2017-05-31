@@ -34,12 +34,14 @@
     "npm": ">=1.0.0"
   },
   "dependencies": {
+    "cacache": "9.2.6",
     "escape-string-regexp": "^1.0.5",
     "fs-write-stream-atomic": "1.0.10",
     "lodash": "4.17.4",
     "mkdirp": "^0.5.1",
     "q": "1.5.0",
     "requireg": "^0.1.6",
+    "semver": "5.3.0",
     "tar-fs": "1.15.2"
   },
   "devDependencies": {

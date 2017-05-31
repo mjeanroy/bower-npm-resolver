@@ -76,14 +76,12 @@ describe('npm-utils', () => {
     promise
       .then((path) => {
         expect(path.length).toBeGreaterThan(0);
-        expect(path).toContains('bower');
-        expect(path).toContains('1.7.7');
-      })
-      .catch(() => {
-        jasmine.fail('Unable to download the tarball');
-      })
-      .finally(() => {
+        expect(path).toContain('bower');
+        expect(path).toContain('1.7.7');
         done();
+      })
+      .catch((err) => {
+        done.fail('Unable to download the tarball');
       });
   });
 
@@ -94,12 +92,10 @@ describe('npm-utils', () => {
     promise
       .then((path) => {
         expect(process.cwd()).toBe(cwd);
+        done();
       })
       .catch(() => {
-        jasmine.fail('Unable to download the tarball');
-      })
-      .finally(() => {
-        done();
+        done.fail('Unable to download the tarball');
       });
   });
 
@@ -118,13 +114,10 @@ describe('npm-utils', () => {
       .then((path) => {
         expect(path).toBe(expected);
         expect(fs.statSync(path).isFile()).toBe(true);
+        done();
       })
       .catch(() => {
-        jasmine.fail('Unable to download the tarball');
-      })
-      .finally(() => {
-        newTmpDir.removeCallback();
-        done();
+        done.fail('Unable to download the tarball');
       });
   });
 
@@ -136,12 +129,10 @@ describe('npm-utils', () => {
       .then((path) => {
         expect(path).toBe(expected);
         expect(fs.statSync(path).isFile()).toBe(true);
+        done();
       })
       .catch(() => {
-        jasmine.fail('Unable to download the tarball');
-      })
-      .finally(() => {
-        done();
+        done.fail('Unable to download the tarball');
       });
   });
 });
