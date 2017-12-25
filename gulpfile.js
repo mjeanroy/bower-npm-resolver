@@ -23,11 +23,11 @@
  */
 
 const path = require('path');
+const log = require('fancy-log');
 const gulp = require('gulp');
 const babel = require('gulp-babel');
 const jasmine = require('gulp-jasmine');
 const bump = require('gulp-bump');
-const gutil = require('gulp-util');
 const git = require('gulp-git');
 const del = require('del');
 const runSequence = require('run-sequence');
@@ -97,7 +97,7 @@ gulp.task('tag', (done) => {
   gulp.task(`bump:${level}`, () => {
     return gulp.src(PKG)
       .pipe(bump({type: level})
-      .on('error', gutil.log))
+      .on('error', (e) => log.error(e)))
       .pipe(gulp.dest(ROOT));
   });
 
