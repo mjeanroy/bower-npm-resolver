@@ -128,6 +128,25 @@ function oldNpmCache(pkg, deferred) {
 }
 
 /**
+ * Fetch package manifest using `pacote` dependency.
+ * With npm < 5.6.0, the manifest object was automatically returned by
+ * the `cache.add` command. This function is here to deal with npm >= 5.6.0
+ * to get the `integrity` checksum used to download the tarball using `cacache`.
+ *
+ * @param {string} pkg Package identifier.
+ * @return {Promise<Object>} The manifest object.
+ */
+function getManifest(pkg) {
+  return require('pacote').manifest(pkg).then((pkgJson) => ({
+    integrity: pkgJson._integrity,
+    manifest: {
+      name: pkgJson.name,
+      version: pkgJson.version,
+    },
+  }));
+}
+
+/**
  * Run npm cache command and resolve the deferred object with the returned
  * metadata.
  *
@@ -137,6 +156,11 @@ function oldNpmCache(pkg, deferred) {
  */
 function newNpmCache(pkg, deferred) {
   npm.commands.cache.add(pkg)
+    .then((info) => (
+      // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
+      // instead of explicitly fetching the manifest file.
+      info ? info : getManifest(pkg)
+    ))
     .then((info) => {
       const manifest = info.manifest;
       const name = manifest.name;
@@ -249,6 +273,9 @@ module.exports = {
         });
 
         inputStream.pipe(outputStream);
+      })
+      .catch((err) => {
+        deferred.reject(err);
       });
 
     return deferred.promise;

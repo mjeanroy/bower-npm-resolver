@@ -39,6 +39,7 @@
     "fs-write-stream-atomic": "1.0.10",
     "lodash": "4.17.4",
     "mkdirp": "^0.5.1",
+    "pacote": "7.0.2",
     "q": "1.5.1",
     "requireg": "^0.1.6",
     "semver": "5.4.1",
