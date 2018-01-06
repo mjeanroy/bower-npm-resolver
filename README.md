@@ -131,6 +131,9 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.8.1
+  - Fix an incompatibility with NPM >= 5.6.0
+  - Various dependency updates
 - 0.8.0
   - Fix an incompatibility with NPM >= 5.0.0
 - 0.7.0
