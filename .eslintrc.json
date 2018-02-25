@@ -7,6 +7,6 @@
       "node": true
     },
     "rules": {
-      "max-len": [2, 120, 2]
+      "max-len": [2, 180, 2]
     }
 }

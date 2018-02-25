@@ -71,10 +71,11 @@ module.exports = function resolver(bower) {
       logger.debug('npm-resolver', `checking for: ${source}`);
 
       const matchResolver = matchers.test(source);
-      const matchPackageName = matchResolver && isNpmPackageName(extractPackageName(source));
+      const pkgName = matchResolver ? extractPackageName(source) : source;
+      const matchPackageName = matchResolver && isNpmPackageName(pkgName);
 
       if (matchResolver && !matchPackageName) {
-        logger.error('npm-resolver', `it seems that you try to fetch a package that is a not a valid npm package.`);
+        logger.error('npm-resolver', `it seems that you try to fetch a package that is a not a valid npm package: ${source} (parsed as: ${pkgName}).`);
         logger.error('npm-resolver', `if you want to fetch a GIT endpoint or an URL, bower can do it natively.`);
         logger.error('npm-resolver', `otherwise, if your are sure that your package exist, please submit an issue.`);
       }
