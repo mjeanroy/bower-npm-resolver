@@ -131,6 +131,10 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.9.0
+  - Update dependencies (`cacache`, `pacote`, etc.).
+  - Fail if npm package name is not valid ([#93](https://github.com/mjeanroy/bower-npm-resolver/issues/93)).
+  - Print package version when running bower with verbose option.
 - 0.8.2
   - Fix an incompatibility with NPM >= 5.6.0
   - Various dependency updates
