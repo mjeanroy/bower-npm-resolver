@@ -31,6 +31,7 @@
 
 const mkdirp = require('mkdirp');
 const path = require('path');
+const pkg = require('../package.json');
 const npmUtils = require('./npm-utils');
 const extract = require('./extract');
 const bowerUtils = require('./bower-utils');
@@ -42,7 +43,8 @@ module.exports = function resolver(bower) {
 
   // Read configuration passed via .bowerrc
   const matchers = matcherUtils.getFromConfig(bower.config.bowerNpmResolver);
-  logger.debug('npm-resolver', 'found matchers: ' + JSON.stringify(matchers));
+  logger.debug('npm-resolver', `initializing bower-npm-resolver ${pkg.version}`);
+  logger.debug('npm-resolver', `found matchers: ${JSON.stringify(matchers)}`);
 
   /**
    * Extract package name from package source.
