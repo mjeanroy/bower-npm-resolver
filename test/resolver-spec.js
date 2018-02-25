@@ -35,11 +35,17 @@ const tmp = require('tmp');
 describe('resolver', () => {
   let resolver;
   let tmpDir;
+  let logger;
 
   beforeEach(() => {
     tmpDir = tmp.dirSync({
       unsafeCleanup: true,
     });
+
+    logger = jasmine.createSpyObj('logger', [
+      'debug',
+      'error',
+    ]);
 
     resolver = factory({
       config: {
@@ -48,12 +54,47 @@ describe('resolver', () => {
         },
       },
       version: '1.7.7',
-      logger: jasmine.createSpyObj('logger', ['debug']),
+      logger,
     });
   });
 
   afterEach(() => {
     tmpDir.removeCallback();
+  });
+
+  it('should not fail to match valid npm package', () => {
+    const source = 'npm:jquery';
+    const result = resolver.match(source);
+    expect(result).toBe(true);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should not fail to match valid npm package with version', () => {
+    const source = 'npm:jquery#1.12.4';
+    const result = resolver.match(source);
+    expect(result).toBe(true);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should not fail to match valid npm scope package', () => {
+    const source = 'npm:@angular/core';
+    const result = resolver.match(source);
+    expect(result).toBe(true);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should not fail to match valid npm scope package with version', () => {
+    const source = 'npm:@angular/core#2.0.0';
+    const result = resolver.match(source);
+    expect(result).toBe(true);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should fail to match npm package URL', () => {
+    const source = 'npm:https://github.com/clappr/clappr-level-selector-plugin.git';
+    const result = resolver.match(source);
+    expect(result).toBe(false);
+    expect(logger.error).toHaveBeenCalled();
   });
 
   it('should get list of releases', (done) => {
