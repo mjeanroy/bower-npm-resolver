@@ -200,7 +200,7 @@ function getManifest(pkg) {
   });
 
 
-  return require('pacote').manifest(pkg).then((pkgJson) => ({
+  return require('pacote').manifest(pkg, opts).then((pkgJson) => ({
     integrity: pkgJson._integrity,
     manifest: {
       name: pkgJson.name,
