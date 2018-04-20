@@ -137,7 +137,8 @@ function oldNpmCache(pkg, deferred) {
  * @return {Promise<Object>} The manifest object.
  */
 function getManifest(pkg) {
-  return require('pacote').manifest(pkg).then((pkgJson) => ({
+	var pakoteOpts = require('npm/lib/config/pacote');
+	return require('pacote').manifest(pkg, pakoteOpts({})).then(function (pkgJson) {
     integrity: pkgJson._integrity,
     manifest: {
       name: pkgJson.name,
