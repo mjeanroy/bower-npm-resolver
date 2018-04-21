@@ -1,8 +1,9 @@
 # NPM modules
-node_modules/
+/node_modules
+/package-lock.json
 
 # Build
-dist/
+/dist
 
 # Temporary directories
 /tmp-*
