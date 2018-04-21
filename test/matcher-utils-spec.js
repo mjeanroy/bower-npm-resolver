@@ -116,27 +116,32 @@ describe('matcher-utils', () => {
       stripPrefix: false,
     },
   }, (config, type) => {
-    let matchers;
+    describe(`when pattern passed as a ${type}`, () => {
+      let matchers;
 
-    it(`should parse config when pattern passed as a ${type}`, () => {
-      matchers = matcherUtils.getFromConfig(config);
-      expect(matchers).toBeDefined();
-    });
-
-    it(`should match a custom pattern passed as a ${type}`, () => {
-      expect(matchers.test('mycompany-test')).toBe(true);
-      expect(matchers.test('test')).toBe(false);
-    });
-
-    if (type !== 'matchPrefix') {
-      it(`should keep matching defaults when custom pattern passed as a ${type}`, () => {
-        expect(matchers.test('npm:test')).toBe(true);
-        expect(matchers.test('npm+test')).toBe(true);
+      beforeEach(() => {
+        matchers = matcherUtils.getFromConfig(config);
       });
-    }
 
-    it(`should not replace from custom pattern passed as a ${type}`, () => {
-      expect(matchers.exec('mycompany-test')).toEqual('mycompany-test');
+      it(`should parse config when pattern passed as a ${type}`, () => {
+        expect(matchers).toBeDefined();
+      });
+
+      it(`should match a custom pattern passed as a ${type}`, () => {
+        expect(matchers.test('mycompany-test')).toBe(true);
+        expect(matchers.test('test')).toBe(false);
+      });
+
+      if (type !== 'matchPrefix') {
+        it(`should keep matching defaults when custom pattern passed as a ${type}`, () => {
+          expect(matchers.test('npm:test')).toBe(true);
+          expect(matchers.test('npm+test')).toBe(true);
+        });
+      }
+
+      it(`should not replace from custom pattern passed as a ${type}`, () => {
+        expect(matchers.exec('mycompany-test')).toEqual('mycompany-test');
+      });
     });
   });
 
