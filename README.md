@@ -131,6 +131,8 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.9.1
+  - Fix a bug ([#35](https://github.com/mjeanroy/bower-npm-resolver/issues/35)) that prevent using custom npm registry (thanks [@madbonez](https://github.com/madbonez)).
 - 0.9.0
   - Update dependencies (`cacache`, `pacote`, etc.).
   - Fail if npm package name is not valid ([#93](https://github.com/mjeanroy/bower-npm-resolver/issues/93)).
