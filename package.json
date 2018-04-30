@@ -43,7 +43,7 @@
     "q": "1.5.1",
     "requireg": "0.1.7",
     "semver": "5.5.0",
-    "tar-fs": "1.16.1",
+    "tar-fs": "1.16.2",
     "validate-npm-package-name": "3.0.0"
   },
   "devDependencies": {
