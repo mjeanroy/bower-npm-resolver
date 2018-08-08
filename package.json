@@ -34,7 +34,7 @@
     "npm": ">=1.0.0"
   },
   "dependencies": {
-    "cacache": "11.0.1",
+    "cacache": "11.2.0",
     "escape-string-regexp": "1.0.5",
     "fs-write-stream-atomic": "1.0.10",
     "lodash": "4.17.5",
