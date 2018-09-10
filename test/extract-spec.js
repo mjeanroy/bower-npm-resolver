@@ -54,13 +54,13 @@ describe('extract', () => {
     expect(promise).toBeDefined();
 
     promise
-      .then((extracted) => {
-        expect(extracted).toBeDefined();
-        expect(fs.statSync(extracted).isDirectory()).toBe(true);
-        done();
-      })
-      .catch(() => {
-        done.fail();
-      });
+        .then((extracted) => {
+          expect(extracted).toBeDefined();
+          expect(fs.statSync(extracted).isDirectory()).toBe(true);
+          done();
+        })
+        .catch(() => {
+          done.fail();
+        });
   });
 });

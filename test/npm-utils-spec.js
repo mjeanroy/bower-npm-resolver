@@ -57,14 +57,14 @@ describe('npm-utils', () => {
     expect(promise).toBeDefined();
 
     promise
-      .then((releases) => {
-        expect(releases.length).toBeGreaterThan(0);
-        expect(releases).toContain('1.7.7');
-        done();
-      })
-      .catch(() => {
-        done.fail('Unable to get list of releases');
-      });
+        .then((releases) => {
+          expect(releases.length).toBeGreaterThan(0);
+          expect(releases).toContain('1.7.7');
+          done();
+        })
+        .catch(() => {
+          done.fail('Unable to get list of releases');
+        });
   });
 
   it('should get tarball', (done) => {
@@ -72,15 +72,15 @@ describe('npm-utils', () => {
     expect(promise).toBeDefined();
 
     promise
-      .then((path) => {
-        expect(path.length).toBeGreaterThan(0);
-        expect(path).toContain('bower');
-        expect(path).toContain('1.7.7');
-        done();
-      })
-      .catch((err) => {
-        done.fail('Unable to download the tarball');
-      });
+        .then((path) => {
+          expect(path.length).toBeGreaterThan(0);
+          expect(path).toContain('bower');
+          expect(path).toContain('1.7.7');
+          done();
+        })
+        .catch((err) => {
+          done.fail('Unable to download the tarball');
+        });
   });
 
   it('should not change current working directory', (done) => {
@@ -88,13 +88,13 @@ describe('npm-utils', () => {
     const promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
 
     promise
-      .then((path) => {
-        expect(process.cwd()).toBe(cwd);
-        done();
-      })
-      .catch(() => {
-        done.fail('Unable to download the tarball');
-      });
+        .then((path) => {
+          expect(process.cwd()).toBe(cwd);
+          done();
+        })
+        .catch(() => {
+          done.fail('Unable to download the tarball');
+        });
   });
 
   it('should get tarball with relative path', (done) => {
@@ -109,14 +109,14 @@ describe('npm-utils', () => {
     const promise = npmUtil.downloadTarball('bower', '1.7.7', relativeToCwd);
 
     promise
-      .then((path) => {
-        expect(path).toBe(expected);
-        expect(fs.statSync(path).isFile()).toBe(true);
-        done();
-      })
-      .catch(() => {
-        done.fail('Unable to download the tarball');
-      });
+        .then((path) => {
+          expect(path).toBe(expected);
+          expect(fs.statSync(path).isFile()).toBe(true);
+          done();
+        })
+        .catch(() => {
+          done.fail('Unable to download the tarball');
+        });
   });
 
   it('should get scoped package tarball', (done) => {
@@ -124,13 +124,13 @@ describe('npm-utils', () => {
     const promise = npmUtil.downloadTarball('@angular/core', '2.0.0', tmpDir.name);
 
     promise
-      .then((path) => {
-        expect(path).toBe(expected);
-        expect(fs.statSync(path).isFile()).toBe(true);
-        done();
-      })
-      .catch(() => {
-        done.fail('Unable to download the tarball');
-      });
+        .then((path) => {
+          expect(path).toBe(expected);
+          expect(fs.statSync(path).isFile()).toBe(true);
+          done();
+        })
+        .catch(() => {
+          done.fail('Unable to download the tarball');
+        });
   });
 });

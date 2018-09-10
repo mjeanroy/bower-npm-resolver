@@ -145,10 +145,10 @@ function getManifest(pkg) {
   // https://github.com/npm/npm/blob/latest/lib/config/pacote.js
   npm.config.keys.forEach(function(k) {
     const authMatchGlobal = k.match(
-      /^(_authToken|username|_password|password|email|always-auth|_auth)$/
+        /^(_authToken|username|_password|password|email|always-auth|_auth)$/
     );
     const authMatchScoped = k[0] === '/' && k.match(
-      /(.*):(_authToken|username|_password|password|email|always-auth|_auth)$/
+        /(.*):(_authToken|username|_password|password|email|always-auth|_auth)$/
     );
 
     // if it matches scoped it will also match global
@@ -158,7 +158,7 @@ function getManifest(pkg) {
       let val = null;
 
       if (!opts.auth) {
-       opts.auth = {};
+        opts.auth = {};
       }
 
       if (authMatchScoped) {
@@ -193,7 +193,7 @@ function getManifest(pkg) {
 
     if (k[0] === '@') {
       if (!opts.scopeTargets) {
-       opts.scopeTargets = {};
+        opts.scopeTargets = {};
       }
       opts.scopeTargets[k.replace(/:registry$/, '')] = npm.config.get(k);
     }
@@ -219,22 +219,22 @@ function getManifest(pkg) {
  */
 function newNpmCache(pkg, deferred) {
   npm.commands.cache.add(pkg)
-    .then((info) => (
-      // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
-      // instead of explicitly fetching the manifest file.
-      info ? info : getManifest(pkg)
-    ))
-    .then((info) => {
-      const manifest = info.manifest;
-      const name = manifest.name;
-      const version = manifest.version;
-      const cache = path.join(npm.cache, '_cacache');
-      const inputStream = require('cacache').get.stream.byDigest(cache, info.integrity);
-      deferred.resolve({name, version, inputStream});
-    })
-    .catch((err) => {
-      deferred.reject(err);
-    });
+      .then((info) => (
+        // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
+        // instead of explicitly fetching the manifest file.
+        info ? info : getManifest(pkg)
+      ))
+      .then((info) => {
+        const manifest = info.manifest;
+        const name = manifest.name;
+        const version = manifest.version;
+        const cache = path.join(npm.cache, '_cacache');
+        const inputStream = require('cacache').get.stream.byDigest(cache, info.integrity);
+        deferred.resolve({name, version, inputStream});
+      })
+      .catch((err) => {
+        deferred.reject(err);
+      });
 }
 
 /**
@@ -306,40 +306,40 @@ module.exports = {
     const deferred = Q.defer();
 
     execCacheCommand(`${pkg}@${version}`)
-      .then((result) => {
-        // The original `pack` command does not support custom directory output.
-        // So, to avoid to change the current working directory pointed by `process.cwd()` (i.e
-        // to avoid side-effect), we just copy the file manually.
-        // This is basically what is done by `npm pack` command.
-        // See: https://github.com/npm/npm/issues/4074
-        // See: https://github.com/npm/npm/blob/v3.10.8/lib/pack.js#L49
-        const inputStream = result.inputStream;
+        .then((result) => {
+          // The original `pack` command does not support custom directory output.
+          // So, to avoid to change the current working directory pointed by `process.cwd()` (i.e
+          // to avoid side-effect), we just copy the file manually.
+          // This is basically what is done by `npm pack` command.
+          // See: https://github.com/npm/npm/issues/4074
+          // See: https://github.com/npm/npm/blob/v3.10.8/lib/pack.js#L49
+          const inputStream = result.inputStream;
 
-        const targetDir = path.resolve(dir);
-        const name = normalizePkgName(result.name);
-        const fileName = `${name}-${result.version}.tgz`;
-        const outputFile = path.join(targetDir, fileName);
-        const outputStream = writeStreamAtomic(outputFile);
+          const targetDir = path.resolve(dir);
+          const name = normalizePkgName(result.name);
+          const fileName = `${name}-${result.version}.tgz`;
+          const outputFile = path.join(targetDir, fileName);
+          const outputStream = writeStreamAtomic(outputFile);
 
-        // Handle errors.
-        inputStream.on('error', (err) => {
+          // Handle errors.
+          inputStream.on('error', (err) => {
+            deferred.reject(err);
+          });
+
+          outputStream.on('error', (err) => {
+            deferred.reject(err);
+          });
+
+          // Handle success.
+          outputStream.on('close', () => {
+            deferred.resolve(outputFile);
+          });
+
+          inputStream.pipe(outputStream);
+        })
+        .catch((err) => {
           deferred.reject(err);
         });
-
-        outputStream.on('error', (err) => {
-          deferred.reject(err);
-        });
-
-        // Handle success.
-        outputStream.on('close', () => {
-          deferred.resolve(outputFile);
-        });
-
-        inputStream.pipe(outputStream);
-      })
-      .catch((err) => {
-        deferred.reject(err);
-      });
 
     return deferred.promise;
   },

@@ -152,21 +152,21 @@ module.exports = function resolver(bower) {
       logger.debug('npm-resolver', `downloading tarball for: ${pkg}#${endpoint.target}`);
       return npmUtils.downloadTarball(pkg, endpoint.target, compressedDir)
 
-        // Download ok, extract tarball.
-        .then((tarballPath) => {
-          logger.debug('npm-resolver', `extracting tarball from: "${tarballPath}" to "${uncompressedDir}`);
-          return extract.tgz(tarballPath, uncompressedDir);
-        })
+          // Download ok, extract tarball.
+          .then((tarballPath) => {
+            logger.debug('npm-resolver', `extracting tarball from: "${tarballPath}" to "${uncompressedDir}`);
+            return extract.tgz(tarballPath, uncompressedDir);
+          })
 
-        // Patch configuration with `package.json` file if `bower.json` does not exist.
-        .then((dir) => {
-          const pkgPath = path.join(dir, 'package');
-          logger.debug('npm-resolver', `extracting and patching bower.json from: ${pkgPath}`);
-          return bowerUtils.patchConfiguration(pkgPath).then(() => ({
-            tempPath: pkgPath,
-            removeIgnores: true,
-          }));
-        });
+          // Patch configuration with `package.json` file if `bower.json` does not exist.
+          .then((dir) => {
+            const pkgPath = path.join(dir, 'package');
+            logger.debug('npm-resolver', `extracting and patching bower.json from: ${pkgPath}`);
+            return bowerUtils.patchConfiguration(pkgPath).then(() => ({
+              tempPath: pkgPath,
+              removeIgnores: true,
+            }));
+          });
     },
   };
 };
