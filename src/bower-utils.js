@@ -63,49 +63,49 @@ module.exports = {
     const bowerJson = path.join(pkg, 'bower.json');
 
     isFile(bowerJson)
-      .then(deferred.resolve)
-      .catch(() => {
-        fs.readFile(path.join(pkg, 'package.json'), 'utf8', (err, data) => {
-          if (err) {
-            deferred.reject(`Could not read package.json from ${pkg}`);
-          } else {
-            const config = JSON.parse(data);
-            const newConfig = _.pick(config, [
-              'name',
-              'description',
-              'main',
-              'moduleType',
-              'keywords',
-              'authors',
-              'license',
-              'ignore',
-              'private',
-              'homepage',
-              'bugs',
-              'repository',
-            ]);
+        .then(deferred.resolve)
+        .catch(() => {
+          fs.readFile(path.join(pkg, 'package.json'), 'utf8', (err, data) => {
+            if (err) {
+              deferred.reject(`Could not read package.json from ${pkg}`);
+            } else {
+              const config = JSON.parse(data);
+              const newConfig = _.pick(config, [
+                'name',
+                'description',
+                'main',
+                'moduleType',
+                'keywords',
+                'authors',
+                'license',
+                'ignore',
+                'private',
+                'homepage',
+                'bugs',
+                'repository',
+              ]);
 
-            // scoped packages get special treatment
-            // See https://github.com/npm/npm/blob/v3.9.1/lib/pack.js#L53
-            if (newConfig.name[0] === '@') {
-              newConfig.name = newConfig.name.substr(1).replace(/\//g, '-');
-            }
-
-            // Do not try to translate dependencies.
-            // Maybe be can try to deduce the dependencies ?
-            newConfig.dependencies = {};
-            newConfig.devDependencies = {};
-
-            fs.writeFile(bowerJson, JSON.stringify(newConfig, null, 2), 'utf-8', (err) => {
-              if (err) {
-                deferred.reject(`Could not write bower.json file to ${pkg}`);
-              } else {
-                deferred.resolve();
+              // scoped packages get special treatment
+              // See https://github.com/npm/npm/blob/v3.9.1/lib/pack.js#L53
+              if (newConfig.name[0] === '@') {
+                newConfig.name = newConfig.name.substr(1).replace(/\//g, '-');
               }
-            });
-          }
+
+              // Do not try to translate dependencies.
+              // Maybe be can try to deduce the dependencies ?
+              newConfig.dependencies = {};
+              newConfig.devDependencies = {};
+
+              fs.writeFile(bowerJson, JSON.stringify(newConfig, null, 2), 'utf-8', (err) => {
+                if (err) {
+                  deferred.reject(`Could not write bower.json file to ${pkg}`);
+                } else {
+                  deferred.resolve();
+                }
+              });
+            }
+          });
         });
-      });
 
     return deferred.promise;
   },

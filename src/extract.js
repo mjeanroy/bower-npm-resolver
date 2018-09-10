@@ -65,12 +65,12 @@ module.exports = {
     const deferred = Q.defer();
 
     fs.createReadStream(src)
-      .on('error', deferred.reject)
-      .pipe(zlib.createGunzip())
-      .on('error', deferred.reject)
-      .pipe(tar.extract(dst, {ignore: isSymlink, dmode: '0555', fmode: '0444'}))
-      .on('error', deferred.reject)
-      .on('finish', deferred.resolve.bind(deferred, dst));
+        .on('error', deferred.reject)
+        .pipe(zlib.createGunzip())
+        .on('error', deferred.reject)
+        .pipe(tar.extract(dst, {ignore: isSymlink, dmode: '0555', fmode: '0444'}))
+        .on('error', deferred.reject)
+        .on('finish', deferred.resolve.bind(deferred, dst));
 
     return deferred.promise;
   },
