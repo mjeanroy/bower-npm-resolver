@@ -138,7 +138,7 @@ function oldNpmCache(pkg, deferred) {
  */
 function getManifest(pkg) {
   // detect custom registry and user auth info
-  let opts = {
+  const opts = {
     registry: npm.config.get('registry'),
   };
 
