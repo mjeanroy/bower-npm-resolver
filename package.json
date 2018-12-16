@@ -9,7 +9,7 @@
     "test": "gulp test",
     "tdd": "gulp tdd",
     "build": "gulp build",
-    "release": "gulp release",
+    "release": "gulp release:minor",
     "release:patch": "gulp release:patch",
     "release:minor": "gulp release:minor",
     "release:major": "gulp release:major"
@@ -49,18 +49,18 @@
   "devDependencies": {
     "@babel/core": "7.2.2",
     "@babel/preset-env": "7.2.0",
+    "decache": "4.5.0",
     "del": "3.0.0",
     "eslint": "5.5.0",
     "eslint-config-google": "0.11.0",
     "fancy-log": "1.3.3",
-    "gulp": "3.9.1",
+    "gulp": "4.0.0",
     "gulp-babel": "8.0.0",
     "gulp-bump": "3.1.1",
     "gulp-eslint": "5.0.0",
     "gulp-git": "2.8.0",
     "gulp-jasmine": "4.0.0",
     "jasmine-core": "3.3.0",
-    "run-sequence": "2.2.1",
     "tmp": "0.0.33"
   },
   "false": {}
