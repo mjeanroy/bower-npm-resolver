@@ -24,7 +24,6 @@
 
 /* eslint-disable require-jsdoc */
 
-const fs = require('fs');
 const path = require('path');
 const log = require('fancy-log');
 const gulp = require('gulp');
@@ -34,12 +33,18 @@ const bump = require('gulp-bump');
 const git = require('gulp-git');
 const del = require('del');
 const eslint = require('gulp-eslint');
+const decache = require('decache');
 
 const ROOT = __dirname;
 const SRC = path.join(ROOT, 'src');
 const TEST = path.join(ROOT, 'test');
 const DIST = path.join(ROOT, 'dist');
 const PKG = path.join(ROOT, 'package.json');
+
+function requireNoCache(path) {
+  decache(path);
+  return require(path);
+}
 
 function clean() {
   return del(DIST);
@@ -101,15 +106,8 @@ function performRelease() {
 }
 
 function tagRelease(done) {
-  fs.readFile(PKG, 'utf8', (err, data) => {
-    if (err) {
-      done(err);
-      return;
-    }
-
-    const version = JSON.parse(data).version;
-    git.tag(`v${version}`, `release: tag version ${version}`, done);
-  });
+  const version = requireNoCache(PKG).version;
+  git.tag(`v${version}`, `release: tag version ${version}`, done);
 }
 
 function prepareNextRelease() {
