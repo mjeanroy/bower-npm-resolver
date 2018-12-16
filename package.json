@@ -9,7 +9,7 @@
     "test": "gulp test",
     "tdd": "gulp tdd",
     "build": "gulp build",
-    "release": "gulp release",
+    "release": "gulp release:minor",
     "release:patch": "gulp release:patch",
     "release:minor": "gulp release:minor",
     "release:major": "gulp release:major"
@@ -60,7 +60,6 @@
     "gulp-git": "2.8.0",
     "gulp-jasmine": "4.0.0",
     "jasmine-core": "3.3.0",
-    "run-sequence": "2.2.1",
     "tmp": "0.0.33"
   },
   "false": {}

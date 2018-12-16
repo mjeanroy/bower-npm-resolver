@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 
+/* eslint-disable require-jsdoc */
+
+const fs = require('fs');
 const path = require('path');
 const log = require('fancy-log');
 const gulp = require('gulp');
@@ -30,7 +33,6 @@ const jasmine = require('gulp-jasmine');
 const bump = require('gulp-bump');
 const git = require('gulp-git');
 const del = require('del');
-const runSequence = require('run-sequence');
 const eslint = require('gulp-eslint');
 
 const ROOT = __dirname;
@@ -39,11 +41,11 @@ const TEST = path.join(ROOT, 'test');
 const DIST = path.join(ROOT, 'dist');
 const PKG = path.join(ROOT, 'package.json');
 
-gulp.task('clean', () => {
+function clean() {
   return del(DIST);
-});
+}
 
-gulp.task('lint', () => {
+function lint() {
   const src = [
     path.join(SRC, '**', '*.js'),
     path.join(TEST, '**', '*.js'),
@@ -54,57 +56,88 @@ gulp.task('lint', () => {
       .pipe(eslint())
       .pipe(eslint.format())
       .pipe(eslint.failAfterError());
-});
+}
 
-gulp.task('build', ['clean', 'lint'], () => {
+function compile() {
   return gulp.src(path.join(SRC, '**', '*.js'))
       .pipe(babel())
       .pipe(gulp.dest(DIST));
-});
+}
 
-gulp.task('test', ['build'], () => {
+function testUnit() {
   return gulp.src(path.join(TEST, '*.js')).pipe(jasmine());
-});
+}
 
-// Rerun the task when a file changes
-gulp.task('tdd', ['test'], () => {
+const build = gulp.series(
+    gulp.parallel(clean, lint),
+    compile
+);
+
+const test = gulp.series(
+    build,
+    testUnit
+);
+
+function tdd() {
   const sources = [
     path.join(SRC, '**', '*.js'),
     path.join(TEST, '**', '*.js'),
   ];
 
-  gulp.watch(sources, ['test']);
-});
+  gulp.watch(sources, test);
+}
 
-gulp.task('pretag', () => {
+function bumpVersion(type) {
+  return gulp.src(PKG)
+      .pipe(bump({type}))
+      .on('error', (e) => log.error(e))
+      .pipe(gulp.dest(ROOT));
+}
+
+function performRelease() {
   return gulp.src([PKG, DIST])
       .pipe(git.add({args: '-f'}))
       .pipe(git.commit('release: release version'));
-});
+}
 
-gulp.task('posttag', () => {
+function tagRelease(done) {
+  fs.readFile(PKG, 'utf8', (err, data) => {
+    if (err) {
+      done(err);
+      return;
+    }
+
+    const version = JSON.parse(data).version;
+    git.tag(`v${version}`, `release: tag version ${version}`, done);
+  });
+}
+
+function prepareNextRelease() {
   return gulp.src(DIST)
       .pipe(git.rm({args: '-r'}))
       .pipe(git.commit('release: prepare next release'));
-});
+}
 
-gulp.task('tag', (done) => {
-  const version = require(PKG).version;
-  git.tag(`v${version}`, `release: tag version ${version}`, done);
-});
+module.exports.clean = clean;
+module.exports.lint = lint;
+module.exports.build = build;
+module.exports.test = test;
+module.exports.tdd = tdd;
 
 ['major', 'minor', 'patch'].forEach((level) => {
-  gulp.task(`bump:${level}`, () => {
-    return gulp.src(PKG)
-        .pipe(bump({type: level}))
-        .on('error', (e) => log.error(e))
-        .pipe(gulp.dest(ROOT));
-  });
+  function prepareRelease() {
+    return bumpVersion(level);
+  }
 
-  gulp.task(`release:${level}`, ['build'], () => {
-    runSequence(`bump:${level}`, 'pretag', 'tag', 'posttag');
-  });
+  const release = gulp.series(
+      prepareRelease,
+      performRelease,
+      tagRelease,
+      prepareNextRelease
+  );
+
+  module.exports[`release:${level}`] = gulp.series(
+      test,
+      release
+  );
 });
-
-// Default release task.
-gulp.task('release', ['release:patch']);
