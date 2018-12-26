@@ -22,24 +22,15 @@
  * SOFTWARE.
  */
 
+/* eslint-disable require-jsdoc */
+
+const path = require('path');
 const gulp = require('gulp');
-const clean = require('./scripts/clean');
-const lint = require('./scripts/lint');
-const build = require('./scripts/build');
-const test = require('./scripts/test');
-const release = require('./scripts/release');
+const babel = require('gulp-babel');
+const config = require('../config');
 
-const prebuild = gulp.series(clean, lint);
-const pretest = gulp.series(prebuild, build);
-const prerelease = gulp.series(pretest, test.test);
-
-module.exports = {
-  'clean': clean,
-  'lint': lint,
-  'build': gulp.series(prebuild, build),
-  'test': gulp.series(pretest, test.test),
-  'tdd': gulp.series(clean, build, test.tdd),
-  'release:patch': gulp.series(prerelease, release.patch),
-  'release:minor': gulp.series(prerelease, release.minor),
-  'release:major': gulp.series(prerelease, release.major),
+module.exports = function build() {
+  return gulp.src(path.join(config.src, '**', '*.js'))
+      .pipe(babel())
+      .pipe(gulp.dest(config.dist));
 };

@@ -22,15 +22,4 @@
 # THE SOFTWARE.
 ##
 
-# NPM modules
-/node_modules
-
-# Do not dev files
-/test
-/src
-/scripts
-/gulpfile.js
-/.eslintrc.json
-/.babelrc
-/.travis.yml
-/.gitattributes
+/dist

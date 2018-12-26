@@ -22,24 +22,25 @@
  * SOFTWARE.
  */
 
-const gulp = require('gulp');
-const clean = require('./scripts/clean');
-const lint = require('./scripts/lint');
-const build = require('./scripts/build');
-const test = require('./scripts/test');
-const release = require('./scripts/release');
+/* eslint-disable require-jsdoc */
 
-const prebuild = gulp.series(clean, lint);
-const pretest = gulp.series(prebuild, build);
-const prerelease = gulp.series(pretest, test.test);
+const path = require('path');
+const gulp = require('gulp');
+const jasmine = require('gulp-jasmine');
+const build = require('../build');
+const config = require('../config');
+
+function test() {
+  return gulp.src(path.join(config.test, '*.js')).pipe(jasmine());
+}
+
+function tdd() {
+  gulp.watch(path.join(config.src, '**', '*.js'), build);
+  gulp.watch(path.join(config.test, '**', '*.js'), test);
+  gulp.watch(path.join(config.dist, '**', '*.js'), test);
+}
 
 module.exports = {
-  'clean': clean,
-  'lint': lint,
-  'build': gulp.series(prebuild, build),
-  'test': gulp.series(pretest, test.test),
-  'tdd': gulp.series(clean, build, test.tdd),
-  'release:patch': gulp.series(prerelease, release.patch),
-  'release:minor': gulp.series(prerelease, release.minor),
-  'release:major': gulp.series(prerelease, release.major),
+  test,
+  tdd,
 };
