@@ -31,6 +31,7 @@
 /scripts
 /gulpfile.js
 /.eslintrc.json
+/.eslintignore
 /.babelrc
 /.travis.yml
 /.gitattributes
