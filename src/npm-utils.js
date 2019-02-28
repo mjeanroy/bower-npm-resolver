@@ -31,33 +31,11 @@
  *  - Rejected with the error returned from NPM.
  */
 
-const requireg = require('requireg');
-const npm = requireg('npm');
 const Q = require('q');
 const path = require('path');
-const fs = require('fs');
 const writeStreamAtomic = require('fs-write-stream-atomic');
-
-/**
- * Load NPM and execute the given callback giving the deferred that should be
- * resolved or rejected in callback parameter.
- *
- * @param {function} cb The callback function executed once NPM has been loaded.
- * @return {Object} A promise, rejected if NPM cannot be loaded.
- */
-function execNpm(cb) {
-  const deferred = Q.defer();
-
-  npm.load((err, meta) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      cb(meta, deferred);
-    }
-  });
-
-  return deferred.promise;
-}
+const npmView = require('./npm/view');
+const npmCache = require('./npm/cache');
 
 /**
  * Executes `npm view` command with passed arguments.
@@ -72,15 +50,7 @@ function execNpm(cb) {
  * @return {Promise} The promise object
  */
 function execViewCommand(args) {
-  return execNpm((meta, deferred) => {
-    npm.commands.view(args, true, (err, data) => {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve(data);
-      }
-    });
-  });
+  return npmView(args);
 }
 
 /**
@@ -96,145 +66,7 @@ function execViewCommand(args) {
  * @return {Promise} The promise object
  */
 function execCacheCommand(pkg) {
-  return execNpm((meta, deferred) => {
-    if (require('semver').lt(meta.version, '5.0.0')) {
-      oldNpmCache(pkg, deferred);
-    } else {
-      newNpmCache(pkg, deferred);
-    }
-  });
-}
-
-/**
- * Run npm cache command and resolve the deferred object with the returned
- * metadata.
- *
- * @param {string} pkg NPM Package id (i.e `bower@1.8.0`).
- * @param {Object} deferred The deferred object to resolve.
- * @return {void}
- */
-function oldNpmCache(pkg, deferred) {
-  npm.commands.cache.add(pkg, null, null, false, (err, data) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      const name = data.name;
-      const version = data.version;
-      const tarball = path.resolve(npm.cache, name, version, 'package.tgz');
-      const inputStream = fs.createReadStream(tarball);
-      deferred.resolve({name, version, inputStream});
-    }
-  });
-}
-
-/**
- * Fetch package manifest using `pacote` dependency.
- * With npm < 5.6.0, the manifest object was automatically returned by
- * the `cache.add` command. This function is here to deal with npm >= 5.6.0
- * to get the `integrity` checksum used to download the tarball using `cacache`.
- *
- * @param {string} pkg Package identifier.
- * @return {Promise<Object>} The manifest object.
- */
-function getManifest(pkg) {
-  // detect custom registry and user auth info
-  const opts = {
-    registry: npm.config.get('registry'),
-  };
-
-  // https://github.com/npm/npm/blob/latest/lib/config/pacote.js
-  npm.config.keys.forEach(function(k) {
-    const authMatchGlobal = k.match(
-        /^(_authToken|username|_password|password|email|always-auth|_auth)$/
-    );
-    const authMatchScoped = k[0] === '/' && k.match(
-        /(.*):(_authToken|username|_password|password|email|always-auth|_auth)$/
-    );
-
-    // if it matches scoped it will also match global
-    if (authMatchGlobal || authMatchScoped) {
-      let nerfDart = null;
-      let key = null;
-      let val = null;
-
-      if (!opts.auth) {
-        opts.auth = {};
-      }
-
-      if (authMatchScoped) {
-        nerfDart = authMatchScoped[1];
-        key = authMatchScoped[2];
-        val = npm.config.get(k);
-        if (!opts.auth[nerfDart]) {
-          opts.auth[nerfDart] = {
-            alwaysAuth: !!npm.config.get('always-auth'),
-          };
-        }
-      } else {
-        key = authMatchGlobal[1];
-        val = npm.config.get(k);
-        opts.auth.alwaysAuth = !!npm.config.get('always-auth');
-      }
-
-      const auth = authMatchScoped ? opts.auth[nerfDart] : opts.auth;
-      if (key === '_authToken') {
-        auth.token = val;
-      } else if (key.match(/password$/i)) {
-        auth.password =
-          // the config file stores password auth already-encoded. pacote expects
-          // the actual username/password pair.
-          Buffer.from(val, 'base64').toString('utf8');
-      } else if (key === 'always-auth') {
-        auth.alwaysAuth = val === 'false' ? false : !!val;
-      } else {
-        auth[key] = val;
-      }
-    }
-
-    if (k[0] === '@') {
-      if (!opts.scopeTargets) {
-        opts.scopeTargets = {};
-      }
-      opts.scopeTargets[k.replace(/:registry$/, '')] = npm.config.get(k);
-    }
-  });
-
-
-  return require('pacote').manifest(pkg, opts).then((pkgJson) => ({
-    integrity: pkgJson._integrity,
-    manifest: {
-      name: pkgJson.name,
-      version: pkgJson.version,
-    },
-  }));
-}
-
-/**
- * Run npm cache command and resolve the deferred object with the returned
- * metadata.
- *
- * @param {string} pkg NPM Package id (i.e `bower@1.8.0`).
- * @param {Object} deferred The deferred object to resolve.
- * @return {void}
- */
-function newNpmCache(pkg, deferred) {
-  npm.commands.cache.add(pkg)
-      .then((info) => (
-        // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
-        // instead of explicitly fetching the manifest file.
-        info ? info : getManifest(pkg)
-      ))
-      .then((info) => {
-        const manifest = info.manifest;
-        const name = manifest.name;
-        const version = manifest.version;
-        const cache = path.join(npm.cache, '_cacache');
-        const inputStream = require('cacache').get.stream.byDigest(cache, info.integrity);
-        deferred.resolve({name, version, inputStream});
-      })
-      .catch((err) => {
-        deferred.reject(err);
-      });
+  return npmCache(pkg);
 }
 
 /**
@@ -338,6 +170,7 @@ module.exports = {
           inputStream.pipe(outputStream);
         })
         .catch((err) => {
+          console.log(err);
           deferred.reject(err);
         });
 
