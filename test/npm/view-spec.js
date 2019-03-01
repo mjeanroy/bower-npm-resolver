@@ -24,8 +24,22 @@
 
 'use strict';
 
-const runChildProcess = require('./_run-child-process');
+const npmView = require('../../dist/npm/view');
 
-module.exports = function view(args) {
-  return runChildProcess('_view.js', args);
-};
+describe('npmView', () => {
+  it('should get package view', (done) => {
+    npmView(['bower@1.7.7', 'versions'])
+        .then((pkgView) => {
+          expect(pkgView).toBeDefined();
+
+          const pkg = pkgView['1.7.7'];
+          expect(pkg.versions).toBeDefined();
+          expect(pkg.versions.length).toBeGreaterThan(0);
+          expect(pkg.versions).toContain('1.7.7');
+          done();
+        })
+        .catch((err) => {
+          done.fail(err);
+        });
+  });
+});

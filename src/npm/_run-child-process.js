@@ -24,8 +24,25 @@
 
 'use strict';
 
-const runChildProcess = require('./_run-child-process');
+const childProcess = require('child_process');
+const path = require('path');
+const Q = require('q');
 
-module.exports = function view(args) {
-  return runChildProcess('_view.js', args);
+module.exports = function runChildProcess(script, args) {
+  const deferred = Q.defer();
+  const processArgs = Array.isArray(args) ? args : [args];
+  const cmd = childProcess.fork(path.join(__dirname, script), processArgs, {
+    silent: true,
+    detached: false,
+  });
+
+  cmd.on('message', (result) => {
+    if (result.err) {
+      deferred.reject(result.err);
+    } else {
+      deferred.resolve(result.result);
+    }
+  });
+
+  return deferred.promise;
 };

@@ -24,8 +24,30 @@
 
 'use strict';
 
-const runChildProcess = require('./_run-child-process');
+const npmCache = require('../../dist/npm/cache');
 
-module.exports = function view(args) {
-  return runChildProcess('_view.js', args);
-};
+describe('npmCache', () => {
+  let originalTimeout;
+
+  beforeEach(() => {
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+  });
+
+  afterEach(() => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  });
+
+  it('should get cached package', (done) => {
+    npmCache('bower@1.7.7')
+        .then((result) => {
+          expect(result.name).toBe('bower');
+          expect(result.version).toBe('1.7.7');
+          expect(result.inputStream).toBeDefined();
+          done();
+        })
+        .catch((err) => {
+          done.fail(err);
+        });
+  });
+});

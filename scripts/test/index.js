@@ -31,7 +31,7 @@ const build = require('../build');
 const config = require('../config');
 
 function test() {
-  return gulp.src(path.join(config.test, '*.js')).pipe(jasmine());
+  return gulp.src(path.join(config.test, '**', '*.js')).pipe(jasmine());
 }
 
 function tdd() {
