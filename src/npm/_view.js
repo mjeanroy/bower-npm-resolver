@@ -45,7 +45,7 @@ const load = require('./_load');
  * The returned promise will be resolved with the result of the cache command (i.e
  * object with all informations about the package).
  *
- * @param {Array} args THe package to download.
+ * @param {Array} args The `view` command arguments, for example `['bower@1.7.7', 'versions']`.
  * @return {Promise} The promise object
  */
 function view(args) {
@@ -61,17 +61,15 @@ function view(args) {
  * @return {Promise} A promise resolved with npm view result.
  */
 function runView(args) {
-  const deferred = Q.defer();
-
-  npm.commands.view(args, false, (err, data) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      deferred.resolve(data);
-    }
+  return Q.Promise((resolve, reject) => {
+    npm.commands.view(args, false, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
   });
-
-  return deferred.promise;
 }
 
 view(process.argv.slice(2))

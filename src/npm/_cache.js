@@ -73,23 +73,21 @@ function runCache(pkg, meta) {
  * @return {void}
  */
 function oldNpmCache(pkg) {
-  const deferred = Q.defer();
-
-  npm.commands.cache.add(pkg, null, null, false, (err, data) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      deferred.resolve({
-        cache: npm.cache,
-        name: data.name,
-        version: data.version,
-        path: path.resolve(npm.cache, data.name, data.version, 'package.tgz'),
-        integrity: null,
-      });
-    }
+  return Q.Promise((resolve, reject) => {
+    npm.commands.cache.add(pkg, null, null, false, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({
+          cache: npm.cache,
+          name: data.name,
+          version: data.version,
+          path: path.resolve(npm.cache, data.name, data.version, 'package.tgz'),
+          integrity: null,
+        });
+      }
+    });
   });
-
-  return deferred.promise;
 }
 
 /**
@@ -100,28 +98,19 @@ function oldNpmCache(pkg) {
  * @return {void}
  */
 function newNpmCache(pkg) {
-  const deferred = Q.defer();
-
-  npm.commands.cache.add(pkg)
+  return npm.commands.cache.add(pkg)
       .then((info) => (
         // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
         // instead of explicitly fetching the manifest file.
         info ? info : getManifest(pkg)
       ))
-      .then((info) => {
-        deferred.resolve({
-          cache: path.join(npm.cache, '_cacache'),
-          name: info.manifest.name,
-          version: info.manifest.version,
-          integrity: info.integrity,
-          path: null,
-        });
-      })
-      .catch((err) => {
-        deferred.reject(err);
-      });
-
-  return deferred.promise;
+      .then((info) => ({
+        cache: path.join(npm.cache, '_cacache'),
+        name: info.manifest.name,
+        version: info.manifest.version,
+        integrity: info.integrity,
+        path: null,
+      }));
 }
 
 /**

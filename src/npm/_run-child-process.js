@@ -29,20 +29,19 @@ const path = require('path');
 const Q = require('q');
 
 module.exports = function runChildProcess(script, args) {
-  const deferred = Q.defer();
-  const processArgs = Array.isArray(args) ? args : [args];
-  const cmd = childProcess.fork(path.join(__dirname, script), processArgs, {
-    silent: true,
-    detached: false,
-  });
+  return Q.Promise((resolve, reject) => {
+    const processArgs = Array.isArray(args) ? args : [args];
+    const cmd = childProcess.fork(path.join(__dirname, script), processArgs, {
+      silent: true,
+      detached: false,
+    });
 
-  cmd.on('message', (result) => {
-    if (result.err) {
-      deferred.reject(result.err);
-    } else {
-      deferred.resolve(result.result);
-    }
+    cmd.on('message', (result) => {
+      if (result.err) {
+        reject(result.err);
+      } else {
+        resolve(result.result);
+      }
+    });
   });
-
-  return deferred.promise;
 };

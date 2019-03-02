@@ -34,15 +34,13 @@ const Q = require('q');
  * @return {Object} A promise, rejected if NPM cannot be loaded.
  */
 module.exports = function load() {
-  const deferred = Q.defer();
-
-  npm.load((err, meta) => {
-    if (err) {
-      deferred.reject(err);
-    } else {
-      deferred.resolve(meta);
-    }
+  return Q.Promise((resolve, reject) => {
+    npm.load((err, meta) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(meta);
+      }
+    });
   });
-
-  return deferred.promise;
 };
