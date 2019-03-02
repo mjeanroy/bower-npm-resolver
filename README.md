@@ -131,6 +131,9 @@ MIT License (MIT)
 
 ## Changelogs
 
+- 0.10.0
+  - Fix a compatibility issue with npm >= 6.6.0 (see [#183](https://github.com/mjeanroy/bower-npm-resolver/issues/183)).
+  - Various dependency updates.
 - 0.9.1
   - Fix a bug ([#35](https://github.com/mjeanroy/bower-npm-resolver/issues/35)) that prevent using custom npm registry (thanks [@madbonez](https://github.com/madbonez)).
 - 0.9.0
