@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Mickael Jeanroy
+ * Copyright (c) 2016-2019 Mickael Jeanroy
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -99,11 +99,9 @@ function oldNpmCache(pkg) {
  */
 function newNpmCache(pkg) {
   return npm.commands.cache.add(pkg)
-      .then((info) => (
-        // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
-        // instead of explicitly fetching the manifest file.
-        info ? info : getManifest(pkg)
-      ))
+      // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
+      // instead of explicitly fetching the manifest file.
+      .then((info) => info ? info : getManifest(pkg))
       .then((info) => ({
         cache: path.join(npm.cache, '_cacache'),
         name: info.manifest.name,
