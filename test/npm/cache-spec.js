@@ -22,30 +22,21 @@
  * SOFTWARE.
  */
 
-/* eslint-disable require-jsdoc */
+'use strict';
 
-const path = require('path');
-const gulp = require('gulp');
-const jasmine = require('gulp-jasmine');
-const build = require('../build');
-const config = require('../config');
+const npmCache = require('../../dist/npm/cache');
 
-function test() {
-  const testSources = [
-    path.join(config.test, 'setup.js'),
-    path.join(config.test, '**', '*.js'),
-  ];
-
-  return gulp.src(testSources).pipe(jasmine());
-}
-
-function tdd() {
-  gulp.watch(path.join(config.src, '**', '*.js'), build);
-  gulp.watch(path.join(config.test, '**', '*.js'), test);
-  gulp.watch(path.join(config.dist, '**', '*.js'), test);
-}
-
-module.exports = {
-  test,
-  tdd,
-};
+describe('npmCache', () => {
+  it('should get cached package', (done) => {
+    npmCache('bower@1.7.7')
+        .then((result) => {
+          expect(result.name).toBe('bower');
+          expect(result.version).toBe('1.7.7');
+          expect(result.inputStream).toBeDefined();
+          done();
+        })
+        .catch((err) => {
+          done.fail(err);
+        });
+  });
+});

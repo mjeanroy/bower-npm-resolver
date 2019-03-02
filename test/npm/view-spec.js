@@ -22,30 +22,24 @@
  * SOFTWARE.
  */
 
-/* eslint-disable require-jsdoc */
+'use strict';
 
-const path = require('path');
-const gulp = require('gulp');
-const jasmine = require('gulp-jasmine');
-const build = require('../build');
-const config = require('../config');
+const npmView = require('../../dist/npm/view');
 
-function test() {
-  const testSources = [
-    path.join(config.test, 'setup.js'),
-    path.join(config.test, '**', '*.js'),
-  ];
+describe('npmView', () => {
+  it('should get package view', (done) => {
+    npmView(['bower@1.7.7', 'versions'])
+        .then((pkgView) => {
+          expect(pkgView).toBeDefined();
 
-  return gulp.src(testSources).pipe(jasmine());
-}
-
-function tdd() {
-  gulp.watch(path.join(config.src, '**', '*.js'), build);
-  gulp.watch(path.join(config.test, '**', '*.js'), test);
-  gulp.watch(path.join(config.dist, '**', '*.js'), test);
-}
-
-module.exports = {
-  test,
-  tdd,
-};
+          const pkg = pkgView['1.7.7'];
+          expect(pkg.versions).toBeDefined();
+          expect(pkg.versions.length).toBeGreaterThan(0);
+          expect(pkg.versions).toContain('1.7.7');
+          done();
+        })
+        .catch((err) => {
+          done.fail(err);
+        });
+  });
+});

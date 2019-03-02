@@ -22,30 +22,27 @@
  * SOFTWARE.
  */
 
-/* eslint-disable require-jsdoc */
+'use strict';
 
-const path = require('path');
-const gulp = require('gulp');
-const jasmine = require('gulp-jasmine');
-const build = require('../build');
-const config = require('../config');
+const fs = require('fs');
+const cacache = require('cacache');
+const runChildProcess = require('./_run-child-process');
 
-function test() {
-  const testSources = [
-    path.join(config.test, 'setup.js'),
-    path.join(config.test, '**', '*.js'),
-  ];
-
-  return gulp.src(testSources).pipe(jasmine());
-}
-
-function tdd() {
-  gulp.watch(path.join(config.src, '**', '*.js'), build);
-  gulp.watch(path.join(config.test, '**', '*.js'), test);
-  gulp.watch(path.join(config.dist, '**', '*.js'), test);
-}
-
-module.exports = {
-  test,
-  tdd,
+module.exports = function cache(args) {
+  return runChildProcess('_cache.js', args).then((result) => (
+    readCacheQueryResult(result)
+  ));
 };
+
+/**
+ * Read cache query result and transform cache entry result to a readable stream.
+ *
+ * @param {Object} result The cache query result.
+ * @return {Object} The result.
+ */
+function readCacheQueryResult(result) {
+  const name = result.name;
+  const version = result.version;
+  const inputStream = result.path ? fs.createReadStream(result.path) : cacache.get.stream.byDigest(result.cache, result.integrity);
+  return {name, version, inputStream};
+}
