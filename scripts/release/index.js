@@ -22,22 +22,11 @@
  * SOFTWARE.
  */
 
+const fs = require('fs');
 const log = require('fancy-log');
 const gulp = require('gulp');
 const bump = require('gulp-bump');
 const git = require('gulp-git');
-const decache = require('decache');
-
-/**
- * Require given file, invalidate cache before calling the native `require` function.
- * @param {string} path File path.
- *
- * @return {Object} The JS module.
- */
-function requireNoCache(path) {
-  decache(path);
-  return require(path);
-}
 
 /**
  * Update version in number in `package.json` file.
@@ -73,8 +62,16 @@ function performRelease() {
  * @return {void}
  */
 function tagRelease(done) {
-  const version = requireNoCache(config.pkg).version;
-  git.tag(`v${version}`, `release: tag version ${version}`, done);
+  fs.readFile(config.pkg, 'utf-8', (err, content) => {
+    if (err) {
+      done(err);
+      return;
+    }
+
+    const pkgJson = JSON.parse(content);
+    const version = pkgJson.version;
+    git.tag(`v${version}`, `release: tag version ${version}`, done);
+  });
 }
 
 /**
