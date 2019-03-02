@@ -27,6 +27,7 @@ const log = require('fancy-log');
 const gulp = require('gulp');
 const bump = require('gulp-bump');
 const git = require('gulp-git');
+const config = require('../config');
 
 /**
  * Update version in number in `package.json` file.
