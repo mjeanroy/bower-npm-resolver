@@ -31,20 +31,15 @@ const tmp = require('tmp');
 
 describe('extract', () => {
   let tmpDir;
-  let originalTimeout;
 
   beforeEach(() => {
     tmpDir = tmp.dirSync({
       unsafeCleanup: true,
     });
-
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
   });
 
   afterEach(() => {
     tmpDir.removeCallback();
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   it('should extract tarball', (done) => {

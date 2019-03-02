@@ -31,16 +31,6 @@ const npmUtil = require('../dist/npm-utils');
 
 describe('npm-utils', () => {
   let tmpDir;
-  let originalTimeout;
-
-  beforeEach(() => {
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
-  });
-
-  afterEach(() => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-  });
 
   beforeEach(() => {
     tmpDir = tmp.dirSync({

@@ -22,21 +22,5 @@
  * SOFTWARE.
  */
 
-'use strict';
-
-const npmCache = require('../../dist/npm/cache');
-
-describe('npmCache', () => {
-  it('should get cached package', (done) => {
-    npmCache('bower@1.7.7')
-        .then((result) => {
-          expect(result.name).toBe('bower');
-          expect(result.version).toBe('1.7.7');
-          expect(result.inputStream).toBeDefined();
-          done();
-        })
-        .catch((err) => {
-          done.fail(err);
-        });
-  });
-});
+// Override default jasmine TIMEOUT
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
