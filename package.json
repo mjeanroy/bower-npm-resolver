@@ -49,7 +49,7 @@
   "devDependencies": {
     "@babel/core": "7.3.4",
     "@babel/preset-env": "7.3.4",
-    "decache": "4.5.0",
+    "decache": "4.5.1",
     "del": "3.0.0",
     "eslint": "5.15.0",
     "eslint-config-google": "0.12.0",
