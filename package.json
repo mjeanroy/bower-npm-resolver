@@ -41,7 +41,7 @@
     "mkdirp": "0.5.1",
     "pacote": "9.5.0",
     "q": "1.5.1",
-    "requireg": "0.2.1",
+    "requireg": "0.2.2",
     "semver": "6.1.0",
     "tar-fs": "2.0.0",
     "validate-npm-package-name": "3.0.0"
