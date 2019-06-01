@@ -23,10 +23,10 @@
  */
 
 const fs = require('fs');
-const log = require('fancy-log');
 const gulp = require('gulp');
 const bump = require('gulp-bump');
 const git = require('gulp-git');
+const log = require('../log');
 const config = require('../config');
 
 /**

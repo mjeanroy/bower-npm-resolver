@@ -52,7 +52,7 @@ function view(args) {
   return load().then(() => (
     runView(args))
   );
-};
+}
 
 /**
  * Run `npm view` command.

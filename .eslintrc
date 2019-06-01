@@ -1,0 +1,29 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "google"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "max-len": [2, 180, 2],
+    "new-cap": ["error", { "capIsNewExceptionPattern": "Q.Promise" }],
+    "valid-jsdoc": [2, {
+      "requireReturn": true,
+      "requireParamDescription": true,
+      "requireReturnDescription": true,
+      "prefer": {
+        "return": "return",
+        "arg": "param",
+        "argument": "param"
+      },
+      "preferType": {
+        "object": "object"
+      }
+    }]
+  }
+}

@@ -170,7 +170,6 @@ module.exports = {
           inputStream.pipe(outputStream);
         })
         .catch((err) => {
-          console.log(err);
           deferred.reject(err);
         });
 

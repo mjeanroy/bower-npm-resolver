@@ -48,7 +48,7 @@ function cache(pkg) {
   return load().then((meta) => (
     runCache(pkg, meta)
   ));
-};
+}
 
 /**
  * Run `npm cache` command.

@@ -58,7 +58,7 @@ module.exports = function resolver(bower) {
     const matchedSource = matchers.exec(source);
     const withoutVersion = matchedSource.split('#')[0];
     return withoutVersion;
-  };
+  }
 
   // Resolver factory returns an instance of resolver
   return {

@@ -30,6 +30,7 @@ const matcherUtils = require('../dist/matcher-utils');
  * Iterate over object keys and trigger callback for each entry.
  * @param {object} obj Object to iterate.
  * @param {function} callback Iteration callback.
+ * @return {void}
  */
 function forEachObjectAsMap(obj, callback) {
   Object.keys(obj).forEach((key) => {

@@ -55,7 +55,7 @@ function isFile(path) {
   });
 
   return deferred.promise;
-};
+}
 
 module.exports = {
   patchConfiguration(pkg) {
