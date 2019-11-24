@@ -47,8 +47,8 @@
     "validate-npm-package-name": "3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.7.2",
-    "@babel/preset-env": "7.7.1",
+    "@babel/core": "7.7.4",
+    "@babel/preset-env": "7.7.4",
     "del": "5.1.0",
     "eslint": "6.7.0",
     "eslint-config-google": "0.14.0",
