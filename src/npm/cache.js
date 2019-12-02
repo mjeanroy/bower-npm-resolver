@@ -25,7 +25,6 @@
 'use strict';
 
 const fs = require('fs');
-const cacache = require('cacache');
 const runChildProcess = require('./_run-child-process');
 
 module.exports = function cache(args) {
@@ -43,6 +42,13 @@ module.exports = function cache(args) {
 function readCacheQueryResult(result) {
   const name = result.name;
   const version = result.version;
-  const inputStream = result.path ? fs.createReadStream(result.path) : cacache.get.stream.byDigest(result.cache, result.integrity);
-  return {name, version, inputStream};
+  const inputStream = result.path ?
+    fs.createReadStream(result.path) :
+    require('cacache').get.stream.byDigest(result.cache, result.integrity);
+
+  return {
+    name,
+    version,
+    inputStream,
+  };
 }
