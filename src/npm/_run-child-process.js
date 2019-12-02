@@ -36,6 +36,18 @@ module.exports = function runChildProcess(script, args) {
       detached: false,
     });
 
+    cmd.on('exit', (code) => {
+      if (code !== 0) {
+        reject();
+      } else {
+        resolve();
+      }
+    });
+
+    cmd.on('error', () => {
+      reject();
+    });
+
     cmd.on('message', (result) => {
       if (result.err) {
         reject(result.err);

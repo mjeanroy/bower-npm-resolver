@@ -7,6 +7,7 @@
     "ecmaVersion": 6
   },
   "env": {
+    "es6": true,
     "node": true
   },
   "rules": {

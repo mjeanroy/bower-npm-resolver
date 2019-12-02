@@ -29,7 +29,6 @@ const requireg = require('requireg');
 const npm = requireg('npm');
 const Q = require('q');
 const semver = require('semver');
-const pacote = require('pacote');
 const load = require('./_load');
 
 /**
@@ -183,7 +182,7 @@ function getManifest(pkg) {
     }
   });
 
-  return pacote.manifest(pkg, opts).then((pkgJson) => ({
+  return require('pacote').manifest(pkg, opts).then((pkgJson) => ({
     integrity: pkgJson._integrity,
     manifest: {
       name: pkgJson.name,
