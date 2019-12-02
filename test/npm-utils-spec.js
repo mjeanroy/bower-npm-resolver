@@ -59,6 +59,7 @@ describe('npm-utils', () => {
 
   it('should get tarball', (done) => {
     const promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
+
     expect(promise).toBeDefined();
 
     promise
@@ -78,7 +79,7 @@ describe('npm-utils', () => {
     const promise = npmUtil.downloadTarball('bower', '1.7.7', tmpDir.name);
 
     promise
-        .then((path) => {
+        .then(() => {
           expect(process.cwd()).toBe(cwd);
           done();
         })
@@ -106,6 +107,9 @@ describe('npm-utils', () => {
         })
         .catch(() => {
           done.fail('Unable to download the tarball');
+        })
+        .finally(() => {
+          newTmpDir.removeCallback();
         });
   });
 
