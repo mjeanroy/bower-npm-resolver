@@ -38,7 +38,7 @@
     "escape-string-regexp": "2.0.0",
     "fs-write-stream-atomic": "1.0.10",
     "lodash": "4.17.15",
-    "mkdirp": "0.5.1",
+    "mkdirp": "1.0.0",
     "pacote": "10.3.0",
     "q": "1.5.1",
     "requireg": "0.2.2",
