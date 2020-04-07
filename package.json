@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "cacache": "15.0.0",
-    "escape-string-regexp": "2.0.0",
+    "escape-string-regexp": "3.0.0",
     "fs-write-stream-atomic": "1.0.10",
     "lodash": "4.17.15",
     "mkdirp": "0.5.1",
