@@ -26,7 +26,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const extract = require('../dist/extract');
+const extract = require('../src/extract');
 const tmp = require('tmp');
 
 describe('extract', () => {

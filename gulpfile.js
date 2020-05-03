@@ -22,6 +22,12 @@
  * SOFTWARE.
  */
 
+require('@babel/register')({
+  ignore: [
+    /node_modules/,
+  ],
+});
+
 const gulp = require('gulp');
 const clean = require('./scripts/clean');
 const lint = require('./scripts/lint');

@@ -24,7 +24,7 @@
 
 'use strict';
 
-const npmCache = require('../../dist/npm/cache');
+const npmCache = require('../../src/npm/cache');
 
 describe('npmCache', () => {
   it('should get cached package', (done) => {

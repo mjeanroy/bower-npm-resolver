@@ -27,7 +27,7 @@
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs');
-const bowerUtil = require('../dist/bower-utils');
+const bowerUtil = require('../src/bower-utils');
 
 describe('bower-utils', () => {
   let tmpDir;

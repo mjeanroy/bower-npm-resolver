@@ -26,10 +26,10 @@
 
 const path = require('path');
 const Q = require('q');
-const factory = require('../dist/resolver');
-const npmUtils = require('../dist/npm-utils');
-const extract = require('../dist/extract');
-const bowerUtils = require('../dist/bower-utils');
+const factory = require('../src/resolver');
+const npmUtils = require('../src/npm-utils');
+const extract = require('../src/extract');
+const bowerUtils = require('../src/bower-utils');
 const tmp = require('tmp');
 
 describe('resolver', () => {

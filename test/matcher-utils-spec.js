@@ -24,7 +24,7 @@
 
 'use strict';
 
-const matcherUtils = require('../dist/matcher-utils');
+const matcherUtils = require('../src/matcher-utils');
 
 /**
  * Iterate over object keys and trigger callback for each entry.

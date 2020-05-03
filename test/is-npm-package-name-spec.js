@@ -24,7 +24,7 @@
 
 'use strict';
 
-const isNpmPackageName = require('../dist/is-npm-package-name');
+const isNpmPackageName = require('../src/is-npm-package-name');
 
 describe('isNpmPackageName', () => {
   it('should return false with empty name', () => {

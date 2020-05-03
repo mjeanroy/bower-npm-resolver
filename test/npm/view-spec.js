@@ -24,7 +24,7 @@
 
 'use strict';
 
-const npmView = require('../../dist/npm/view');
+const npmView = require('../../src/npm/view');
 
 describe('npmView', () => {
   it('should get package view', (done) => {
