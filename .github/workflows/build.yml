@@ -1,0 +1,19 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        node: [ 6, 7, 8, 9, 10, 11, 12, 13 ]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        name: Set up NodeJS
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Insrall
+        run: npm install
+      - name: Test
+        run: npm test
