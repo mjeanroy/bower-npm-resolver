@@ -91,7 +91,7 @@ describe('npm-utils', () => {
   it('should get tarball with relative path', (done) => {
     const newTmpDir = tmp.dirSync({
       unsafeCleanup: true,
-      dir: path.join(__dirname, '..'),
+      tmpdir: path.join(__dirname, '..'),
     });
 
     const relativeToCwd = path.relative(process.cwd(), newTmpDir.name);
