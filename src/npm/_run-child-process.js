@@ -38,14 +38,14 @@ module.exports = function runChildProcess(script, args) {
 
     cmd.on('exit', (code) => {
       if (code !== 0) {
-        reject();
+        reject(`Child process exited with code: ${code}`);
       } else {
         resolve();
       }
     });
 
-    cmd.on('error', () => {
-      reject();
+    cmd.on('error', (err) => {
+      reject(err);
     });
 
     cmd.on('message', (result) => {
