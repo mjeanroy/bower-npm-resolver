@@ -23,4 +23,4 @@
  */
 
 // Override default jasmine TIMEOUT
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
