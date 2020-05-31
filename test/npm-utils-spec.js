@@ -52,8 +52,8 @@ describe('npm-utils', () => {
           expect(releases).toContain('1.7.7');
           done();
         })
-        .catch(() => {
-          done.fail('Unable to get list of releases');
+        .catch((err) => {
+          done.fail(err);
         });
   });
 
@@ -70,7 +70,7 @@ describe('npm-utils', () => {
           done();
         })
         .catch((err) => {
-          done.fail('Unable to download the tarball');
+          done.fail(err);
         });
   });
 
@@ -83,8 +83,8 @@ describe('npm-utils', () => {
           expect(process.cwd()).toBe(cwd);
           done();
         })
-        .catch(() => {
-          done.fail('Unable to download the tarball');
+        .catch((err) => {
+          done.fail(err);
         });
   });
 
@@ -105,8 +105,8 @@ describe('npm-utils', () => {
           expect(fs.statSync(path).isFile()).toBe(true);
           done();
         })
-        .catch(() => {
-          done.fail('Unable to download the tarball');
+        .catch((err) => {
+          done.fail(err);
         })
         .finally(() => {
           newTmpDir.removeCallback();
@@ -123,8 +123,8 @@ describe('npm-utils', () => {
           expect(fs.statSync(path).isFile()).toBe(true);
           done();
         })
-        .catch(() => {
-          done.fail('Unable to download the tarball');
+        .catch((err) => {
+          done.fail(err);
         });
   });
 });
