@@ -120,66 +120,14 @@ function newNpmCache(pkg) {
  * @return {Promise<Object>} The manifest object.
  */
 function getManifest(pkg) {
-  // detect custom registry and user auth info
+  // Use npm config to detect custom registry and user auth info
   const opts = {
     registry: npm.config.get('registry'),
   };
 
   // https://github.com/npm/npm/blob/latest/lib/config/pacote.js
   npm.config.keys.forEach(function(k) {
-    const authMatchGlobal = k.match(
-        /^(_authToken|username|_password|password|email|always-auth|_auth)$/
-    );
-    const authMatchScoped = k[0] === '/' && k.match(
-        /(.*):(_authToken|username|_password|password|email|always-auth|_auth)$/
-    );
-
-    // if it matches scoped it will also match global
-    if (authMatchGlobal || authMatchScoped) {
-      let nerfDart = null;
-      let key = null;
-      let val = null;
-
-      if (!opts.auth) {
-        opts.auth = {};
-      }
-
-      if (authMatchScoped) {
-        nerfDart = authMatchScoped[1];
-        key = authMatchScoped[2];
-        val = npm.config.get(k);
-        if (!opts.auth[nerfDart]) {
-          opts.auth[nerfDart] = {
-            alwaysAuth: !!npm.config.get('always-auth'),
-          };
-        }
-      } else {
-        key = authMatchGlobal[1];
-        val = npm.config.get(k);
-        opts.auth.alwaysAuth = !!npm.config.get('always-auth');
-      }
-
-      const auth = authMatchScoped ? opts.auth[nerfDart] : opts.auth;
-      if (key === '_authToken') {
-        auth.token = val;
-      } else if (key.match(/password$/i)) {
-        auth.password =
-          // the config file stores password auth already-encoded. pacote expects
-          // the actual username/password pair.
-          Buffer.from(val, 'base64').toString('utf8');
-      } else if (key === 'always-auth') {
-        auth.alwaysAuth = val === 'false' ? false : !!val;
-      } else {
-        auth[key] = val;
-      }
-    }
-
-    if (k[0] === '@') {
-      if (!opts.scopeTargets) {
-        opts.scopeTargets = {};
-      }
-      opts.scopeTargets[k.replace(/:registry$/, '')] = npm.config.get(k);
-    }
+    opts[k] = npm.config.get(k);
   });
 
   return require('pacote').manifest(pkg, opts).then((pkgJson) => ({
