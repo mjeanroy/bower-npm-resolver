@@ -22,5 +22,18 @@
  * SOFTWARE.
  */
 
-// Override default jasmine TIMEOUT
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+const nock = require('nock');
+
+beforeEach(() => {
+  // Override default jasmine TIMEOUT.
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
+
+  // Disable real HTTP requests.
+  nock.disableNetConnect();
+});
+
+afterEach(() => {
+  // Cleanup nock interceptors.
+  nock.cleanAll();
+  nock.enableNetConnect();
+});
