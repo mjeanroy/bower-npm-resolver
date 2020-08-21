@@ -37,6 +37,20 @@ jobs:
         name: Set up NodeJS
         with:
           node-version: ${{ matrix.node }}
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - name: Get npm version
+        id: npm-version
+        run: |
+          echo "::set-output name=version::$(npm -v)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ steps.npm-version.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
       - name: Install
         run: npm install
       - name: Test
