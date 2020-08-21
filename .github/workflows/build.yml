@@ -53,5 +53,7 @@ jobs:
             ${{ runner.os }}-npm-
       - name: Install
         run: npm install
+      - name: Dependencies
+        run: npm list
       - name: Test
         run: npm test
