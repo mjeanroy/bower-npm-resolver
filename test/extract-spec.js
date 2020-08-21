@@ -43,7 +43,7 @@ describe('extract', () => {
   });
 
   it('should extract tarball', (done) => {
-    const src = path.join(__dirname, 'bower-1.7.7.tgz');
+    const src = path.join(__dirname, 'fixtures', 'bower-1.7.7.tgz');
     const dst = tmpDir.name;
     const promise = extract.tgz(src, dst);
     expect(promise).toBeDefined();
