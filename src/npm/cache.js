@@ -42,13 +42,26 @@ module.exports = function cache(args) {
 function readCacheQueryResult(result) {
   const name = result.name;
   const version = result.version;
-  const inputStream = result.path ?
-    fs.createReadStream(result.path) :
-    require('cacache').get.stream.byDigest(result.cache, result.integrity);
+  const inputStream = result.path ? createReadStream(result) : getStreamByDigest(result);
+  return {name, version, inputStream};
+}
 
-  return {
-    name,
-    version,
-    inputStream,
-  };
+/**
+ * Create stream from given `path` property of result object.
+ *
+ * @param {Object} result The result object.
+ * @return {ReadStream} The result stream.
+ */
+function createReadStream(result) {
+  return fs.createReadStream(result.path);
+}
+
+/**
+ * Get stream from npm cache.
+ *
+ * @param {Object} result The result object.
+ * @return {ReadStream} The result stream.
+ */
+function getStreamByDigest(result) {
+  return require('cacache').get.stream.byDigest(result.cache, result.integrity);
 }
