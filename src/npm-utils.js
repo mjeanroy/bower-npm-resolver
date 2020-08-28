@@ -34,24 +34,9 @@
 const Q = require('q');
 const path = require('path');
 const writeStreamAtomic = require('fs-write-stream-atomic');
-const npmView = require('./npm/view');
-const npmCache = require('./npm/cache');
 
-/**
- * Executes `npm view` command with passed arguments.
- * Arguments is an array of `npm view` arguments.
- * So if cmd command was `npm view bower@1.7.7`, then argument
- * would be 'bower@1.7.7'.
- *
- * The returned promise will be resolved with the result of the cache command (i.e
- * object with all informations about the package).
- *
- * @param {Array} args THe package to download.
- * @return {Promise} The promise object
- */
-function execViewCommand(args) {
-  return npmView(args);
-}
+const npmVersions = require('./npm/versions');
+const npmCache = require('./npm/cache');
 
 /**
  * Executes `npm cache-add` command with passed arguments.
@@ -81,45 +66,17 @@ function normalizePkgName(name) {
   return name[0] === '@' ? name.substr(1).replace(/\//g, '-') : name;
 }
 
-/**
- * Returns the last key (in alpha-numeric order) of an object.
- *
- * @param {Object} o The object.
- * @return {string} The last key.
- */
-function getLastKey(o) {
-  const keys = Object.keys(o);
-  keys.sort();
-  return keys[keys.length - 1];
-}
-
 module.exports = {
 
   /**
    * Return the versions defined on NPM for a given package.
-   * Basically, execute `npm view pkg versions` and return the results.
-   * Note that NPM will return an object, such as:
-   *
-   * ```json
-   *   { '1.7.7': { versions: ['1.0.0', '1.1.0' ] } }
-   * ```
-   *
    * The promise will be resolved with the array of versions (i.e `['1.0.0', '1.1.0' ]`).
    *
    * @param {String} pkg The package name.
    * @return {Promise} The promise object.
    */
   releases(pkg) {
-    return execViewCommand([pkg, 'versions']).then((data) => {
-      // If it is already an array, return it.
-      if (Array.isArray(data)) {
-        return data;
-      }
-
-      // Otherwise, unwrap it.
-      const mostRecentVersion = getLastKey(data);
-      return data[mostRecentVersion].versions;
-    });
+    return npmVersions(pkg);
   },
 
   /**

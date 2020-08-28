@@ -24,22 +24,31 @@
 
 'use strict';
 
-const npmView = require('../../src/npm/view');
+const Q = require('q');
+const packument = require('packument');
+const npmLoad = require('./_load');
+const npmConfig = require('./_config');
 
-describe('npmView', () => {
-  it('should get package view', (done) => {
-    npmView(['bower@1.7.7', 'versions'])
-        .then((pkgView) => {
-          expect(pkgView).toBeDefined();
+module.exports = function versions(pkg) {
+  return npmLoad().then(() => (
+    getVersions(pkg)
+  ));
+};
 
-          const pkg = pkgView['1.7.7'];
-          expect(pkg.versions).toBeDefined();
-          expect(pkg.versions.length).toBeGreaterThan(0);
-          expect(pkg.versions).toContain('1.7.7');
-          done();
-        })
-        .catch((err) => {
-          done.fail(err);
-        });
+/**
+ * Get all versions available for given package.
+ *
+ * @param {string} pkg The package.
+ * @return {Promise<Array<string>>} An array containing all versions for given package.
+ */
+function getVersions(pkg) {
+  return Q.promise((resolve, reject) => {
+    packument(pkg, npmConfig(), (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(Object.keys(result.versions));
+      }
+    });
   });
-});
+}

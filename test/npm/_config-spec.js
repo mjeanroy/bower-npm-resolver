@@ -30,7 +30,7 @@ const npmConfig = require('../../src/npm/_config');
 
 describe('config', () => {
   it('should load npm and get config', (done) => {
-    npm.load((err, meta) => {
+    npm.load((err) => {
       if (err) {
         done.fail(err);
         return;
