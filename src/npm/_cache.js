@@ -29,7 +29,9 @@ const requireg = require('requireg');
 const npm = requireg('npm');
 const Q = require('q');
 const semver = require('semver');
-const load = require('./_load');
+
+const npmLoad = require('./_load');
+const npmConfig = require('./_config');
 
 /**
  * Executes `npm cache-add` command with passed arguments.
@@ -44,7 +46,7 @@ const load = require('./_load');
  * @return {Promise} The promise object
  */
 function cache(pkg) {
-  return load().then((meta) => (
+  return npmLoad().then((meta) => (
     runCache(pkg, meta)
   ));
 }
@@ -128,35 +130,13 @@ function newNpmCache(pkg) {
  * @return {Promise<Object>} The manifest object.
  */
 function getManifest(pkg) {
-  return require('pacote').manifest(pkg, npmFlatOptions()).then((pkgJson) => ({
+  return require('pacote').manifest(pkg, npmConfig()).then((pkgJson) => ({
     integrity: pkgJson._integrity,
     manifest: {
       name: pkgJson.name,
       version: pkgJson.version,
     },
   }));
-}
-
-/**
- * Get npm options as a flat object.
- *
- * @return {Object} NPM Options.
- */
-function npmFlatOptions() {
-  // Added with npm >= 7
-  if (npm.flatOptions) {
-    return npm.flatOptions;
-  }
-
-  const opts = {
-    registry: npm.config.get('registry'),
-  };
-
-  npm.config.keys.forEach((k) => {
-    opts[k] = npm.config.get(k);
-  });
-
-  return opts;
 }
 
 cache(process.argv.slice(2).join(''))
