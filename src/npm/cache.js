@@ -24,14 +24,116 @@
 
 'use strict';
 
+const path = require('path');
 const fs = require('fs');
-const runChildProcess = require('./_run-child-process');
+const semver = require('semver');
+const Q = require('q');
+const requireg = require('requireg');
+const npm = requireg('npm');
+
+const npmLoad = require('./_load');
+const npmConfig = require('./_config');
 
 module.exports = function cache(args) {
-  return runChildProcess('_cache.js', args).then((result) => (
+  return cacheAdd(args).then((result) => (
     readCacheQueryResult(result)
   ));
 };
+
+/**
+ * Executes `npm cache-add` command with passed arguments.
+ * Arguments is the name of the cache to download.
+ * So if cmd command was `npm cache-add bower@1.7.7 versions`, then argument
+ * would be `['bower@1.7.7', 'versions']`.
+ *
+ * The returned promise will be resolved with the result of the cache command (i.e
+ * object with all informations about the package).
+ *
+ * @param {Array} pkg THe package to download.
+ * @return {Promise} The promise object
+ */
+function cacheAdd(pkg) {
+  return npmLoad().then((meta) => {
+    if (semver.lt(meta.version, '5.0.0')) {
+      return npmCacheAddLegacy(pkg);
+    } else {
+      return npmCacheAdd(pkg);
+    }
+  });
+}
+
+/**
+ * Run npm cache command and resolve the deferred object with the returned
+ * metadata.
+ *
+ * @param {string} pkg NPM Package id (i.e `bower@1.8.0`).
+ * @return {void}
+ */
+function npmCacheAddLegacy(pkg) {
+  return Q.Promise((resolve, reject) => {
+    npm.commands.cache(['add', pkg], (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({
+          cache: npm.cache,
+          name: data.name,
+          version: data.version,
+          path: path.resolve(npm.cache, data.name, data.version, 'package.tgz'),
+          integrity: null,
+        });
+      }
+    });
+  });
+}
+
+/**
+ * Run npm cache command and resolve the deferred object with the returned
+ * metadata.
+ *
+ * @param {string} pkg NPM Package id (i.e `bower@1.8.0`).
+ * @return {void}
+ */
+function npmCacheAdd(pkg) {
+  const promise = Q.promise((resolve, reject) => {
+    npm.commands.cache(['add', pkg], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+
+  return promise
+      .then((info) => info ? info : manifest(pkg))
+      .then((info) => ({
+        cache: path.join(npm.cache, '_cacache'),
+        name: info.manifest.name,
+        version: info.manifest.version,
+        integrity: info.integrity,
+        path: null,
+      }));
+}
+
+/**
+ * Fetch package manifest using `pacote` dependency.
+ * With npm < 5.6.0, the manifest object was automatically returned by
+ * the `cache.add` command. This function is here to deal with npm >= 5.6.0
+ * to get the `integrity` checksum used to download the tarball using `cacache`.
+ *
+ * @param {string} pkg Package identifier.
+ * @return {Promise<Object>} The manifest object.
+ */
+function manifest(pkg) {
+  return require('pacote').manifest(pkg, npmConfig()).then((pkgJson) => ({
+    integrity: pkgJson._integrity,
+    manifest: {
+      name: pkgJson.name,
+      version: pkgJson.version,
+    },
+  }));
+}
 
 /**
  * Read cache query result and transform cache entry result to a readable stream.
@@ -43,7 +145,11 @@ function readCacheQueryResult(result) {
   const name = result.name;
   const version = result.version;
   const inputStream = result.path ? createReadStream(result) : getStreamByDigest(result);
-  return {name, version, inputStream};
+  return {
+    name,
+    version,
+    inputStream,
+  };
 }
 
 /**
