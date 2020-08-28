@@ -128,23 +128,35 @@ function newNpmCache(pkg) {
  * @return {Promise<Object>} The manifest object.
  */
 function getManifest(pkg) {
-  // Use npm config to detect custom registry and user auth info
-  const opts = {
-    registry: npm.config.get('registry'),
-  };
-
-  // https://github.com/npm/npm/blob/latest/lib/config/pacote.js
-  npm.config.keys.forEach(function(k) {
-    opts[k] = npm.config.get(k);
-  });
-
-  return require('pacote').manifest(pkg, opts).then((pkgJson) => ({
+  return require('pacote').manifest(pkg, npmFlatOptions()).then((pkgJson) => ({
     integrity: pkgJson._integrity,
     manifest: {
       name: pkgJson.name,
       version: pkgJson.version,
     },
   }));
+}
+
+/**
+ * Get npm options as a flat object.
+ *
+ * @return {Object} NPM Options.
+ */
+function npmFlatOptions() {
+  // Added with npm >= 7
+  if (npm.flatOptions) {
+    return npm.flatOptions;
+  }
+
+  const opts = {
+    registry: npm.config.get('registry'),
+  };
+
+  npm.config.keys.forEach((k) => {
+    opts[k] = npm.config.get(k);
+  });
+
+  return opts;
 }
 
 cache(process.argv.slice(2).join(''))
