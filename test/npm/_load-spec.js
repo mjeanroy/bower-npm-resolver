@@ -24,25 +24,18 @@
 
 'use strict';
 
-const requireg = require('requireg');
-const npm = requireg('npm');
-const Q = require('q');
+const load = require('../../src/npm/_load');
 
-/**
- * Load NPM and returns a promise resolved with npm meta result.
- *
- * @return {Object} A promise, rejected if NPM cannot be loaded.
- */
-module.exports = function load() {
-  return Q.Promise((resolve, reject) => {
-    npm.load((err, meta) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(meta || {
-          version: npm.version,
+describe('load', () => {
+  it('should load npm and get meta data', (done) => {
+    load()
+        .then((meta) => {
+          expect(meta).toBeDefined();
+          expect(meta.version).toBeDefined();
+          done();
+        })
+        .catch((err) => {
+          done.fail(err);
         });
-      }
-    });
   });
-};
+});
