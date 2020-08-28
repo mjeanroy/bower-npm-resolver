@@ -24,8 +24,19 @@
 
 'use strict';
 
-const runChildProcess = require('./_run-child-process');
+const npmVersions = require('../../src/npm/versions');
 
-module.exports = function view(args) {
-  return runChildProcess('_view.js', args);
-};
+describe('npmVersions', () => {
+  it('should get versions of given package', (done) => {
+    npmVersions('bower')
+        .then((versions) => {
+          expect(versions).toBeDefined();
+          expect(versions.length).toBeGreaterThan(0);
+          expect(versions).toContain('1.7.7');
+          done();
+        })
+        .catch((err) => {
+          done.fail(err);
+        });
+  });
+});
