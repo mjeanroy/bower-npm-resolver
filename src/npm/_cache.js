@@ -73,7 +73,7 @@ function runCache(pkg, meta) {
  */
 function oldNpmCache(pkg) {
   return Q.Promise((resolve, reject) => {
-    npm.commands.cache.add(pkg, null, null, false, (err, data) => {
+    npm.commands.cache(['add', pkg], (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -97,9 +97,17 @@ function oldNpmCache(pkg) {
  * @return {void}
  */
 function newNpmCache(pkg) {
-  return npm.commands.cache.add(pkg)
-      // With npm < 5.6.0, the manifest object is returned by the ̀cache.add` command, so use it
-      // instead of explicitly fetching the manifest file.
+  const promise = Q.promise((resolve, reject) => {
+    npm.commands.cache(['add', pkg], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+
+  return promise
       .then((info) => info ? info : getManifest(pkg))
       .then((info) => ({
         cache: path.join(npm.cache, '_cacache'),
