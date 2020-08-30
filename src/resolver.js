@@ -29,9 +29,9 @@
  * Will be called only one time by Bower, to instantiate resolver.
  */
 
-const mkdirp = require('mkdirp');
 const path = require('path');
 const pkg = require('../package.json');
+const mkdirp = require('./mkdirp');
 const npmUtils = require('./npm-utils');
 const extract = require('./extract');
 const bowerUtils = require('./bower-utils');
@@ -143,14 +143,20 @@ module.exports = function resolver(bower) {
 
       // Directory where the tgz will be stored.
       const compressedDir = path.join(storage, 'npm-resolver/compressed');
-      mkdirp.sync(compressedDir);
-
-      // Directory where the tgz file will be extracted.
       const uncompressedDir = path.join(storage, 'npm-resolver/uncompressed', pkg, endpoint.target);
-      mkdirp.sync(uncompressedDir);
 
-      logger.debug('npm-resolver', `downloading tarball for: ${pkg}#${endpoint.target}`);
-      return npmUtils.downloadTarball(pkg, endpoint.target, compressedDir)
+      logger.debug('npm-resolver', `creating directory for compressed resources: ${compressedDir}`);
+      return mkdirp(compressedDir)
+          .then(() => {
+            logger.debug('npm-resolver', `creating directory for uncompressed resources: ${uncompressedDir}`);
+            return mkdirp(uncompressedDir);
+          })
+
+          // Download tarball.
+          .then(() => {
+            logger.debug('npm-resolver', `downloading tarball for: ${pkg}#${endpoint.target}`);
+            return npmUtils.downloadTarball(pkg, endpoint.target, compressedDir);
+          })
 
           // Download ok, extract tarball.
           .then((tarballPath) => {

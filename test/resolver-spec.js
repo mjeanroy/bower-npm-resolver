@@ -127,56 +127,50 @@ describe('resolver', () => {
   });
 
   it('should fetch release', (done) => {
-    const d1 = Q.defer();
-    const p1 = d1.promise;
-    spyOn(npmUtils, 'downloadTarball').and.returnValue(p1);
+    const pkgName = 'bower';
+    const pkgVersion = '1.7.7';
 
-    const d3 = Q.defer();
-    const p3 = d3.promise;
-    spyOn(extract, 'tgz').and.returnValue(p3);
+    const tarballPath = '/tmp/bower.tgz';
+    const pkgPath = '/tmp/bower';
+    const bowerPkgPath = path.normalize(pkgPath + '/package');
 
-    const d4 = Q.defer();
-    const p4 = d4.promise;
-    spyOn(bowerUtils, 'patchConfiguration').and.returnValue(p4);
+    spyOn(npmUtils, 'downloadTarball').and.callFake((pkg, version, dir) => {
+      expect(pkg).toBe('bower');
+      expect(version).toBe('1.7.7');
+      expect(dir).toBe(path.join(tmpDir.name, 'npm-resolver', 'compressed'));
+      return Q.resolve(tarballPath);
+    });
 
-    const source = 'npm:bower#~1.7.0';
-    const target = '1.7.7';
+    spyOn(extract, 'tgz').and.callFake((file, dir) => {
+      expect(file).toBe(tarballPath);
+      expect(dir).toBe(path.join(tmpDir.name, 'npm-resolver', 'uncompressed', pkgName, pkgVersion));
+      return Q.resolve(pkgPath);
+    });
 
+    spyOn(bowerUtils, 'patchConfiguration').and.callFake((dir) => {
+      expect(dir).toBe(bowerPkgPath);
+      return Q.resolve();
+    });
+
+    const source = `npm:${pkgName}#~1.7.0`;
+    const target = `${pkgVersion}`;
     const result = resolver.fetch({
       source: source,
       target: target,
     });
 
     // Fail if something bad happen.
-    result.catch(() => {
-      done.fail();
+    result.catch((err) => {
+      done.fail(err);
     });
 
-    expect(result).toBeDefined();
-    expect(npmUtils.downloadTarball).toHaveBeenCalledWith('bower', '1.7.7', jasmine.any(String));
-    expect(extract.tgz).not.toHaveBeenCalled();
+    result.then((r) => {
+      expect(npmUtils.downloadTarball).toHaveBeenCalled();
+      expect(extract.tgz).toHaveBeenCalled();
+      expect(bowerUtils.patchConfiguration).toHaveBeenCalled();
 
-    const tarballPath = '/tmp/bower.tgz';
-    const pkgPath = '/tmp/bower';
-    const bowerPkgPath = path.normalize(pkgPath + '/package');
-
-    d1.resolve(tarballPath);
-
-    p1.then(() => {
-      d3.resolve(pkgPath);
-    });
-
-    p3.then(() => {
-      d4.resolve();
-    });
-
-    // Check final result.
-    result.then((result) => {
-      expect(extract.tgz).toHaveBeenCalledWith(tarballPath, jasmine.any(String));
-      expect(bowerUtils.patchConfiguration).toHaveBeenCalledWith(bowerPkgPath);
-
-      expect(result).toBeDefined();
-      expect(result).toEqual({
+      expect(r).toBeDefined();
+      expect(r).toEqual({
         tempPath: bowerPkgPath,
         removeIgnores: true,
       });
