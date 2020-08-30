@@ -22,6 +22,9 @@
 # THE SOFTWARE.
 ##
 
+# OS
+.DS_Store
+
 # NPM modules
 /node_modules
 /package-lock.json
