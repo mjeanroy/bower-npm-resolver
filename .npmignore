@@ -30,9 +30,10 @@
 /src
 /scripts
 /gulpfile.js
+/.babelrc
+/.github
 /.eslintrc
 /.eslintrc.json
 /.eslintignore
-/.babelrc
-/.travis.yml
 /.gitattributes
+/.travis.yml
