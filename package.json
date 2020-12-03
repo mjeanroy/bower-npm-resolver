@@ -43,7 +43,7 @@
     "pacote": "11.0.1",
     "q": "1.5.1",
     "requireg": "0.2.2",
-    "semver": "7.3.2",
+    "semver": "7.3.4",
     "tar-fs": "2.1.1",
     "validate-npm-package-name": "3.0.0"
   },
