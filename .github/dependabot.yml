@@ -1,0 +1,33 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: pacote
+    versions:
+    - 11.2.3
+    - 11.2.4
+    - 11.2.5
+    - 11.2.6
+    - 11.2.7
+    - 11.3.0
+    - 11.3.2
+  - dependency-name: "@babel/core"
+    versions:
+    - 7.12.16
+    - 7.13.13
+  - dependency-name: jasmine
+    versions:
+    - 3.6.4
+    - 3.7.0
+  - dependency-name: "@babel/preset-env"
+    versions:
+    - 7.12.16
+    - 7.13.0
+    - 7.13.8
+  - dependency-name: "@babel/register"
+    versions:
+    - 7.13.0
