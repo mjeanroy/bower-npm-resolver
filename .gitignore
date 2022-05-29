@@ -29,6 +29,10 @@
 /node_modules
 /package-lock.json
 
+# IDE
+/.idea
+*.iml
+
 # Build
 /dist
 
