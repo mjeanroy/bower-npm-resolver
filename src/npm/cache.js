@@ -28,7 +28,7 @@ const fs = require('fs');
 const Q = require('q');
 const npmLoad = require('./_load');
 const npmConfig = require('./_config');
-const {exec} = require('node:child_process');
+const {exec} = require('child_process');
 
 module.exports = function cache(args) {
   return cacheAdd(args).then((result) => (

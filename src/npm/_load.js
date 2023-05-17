@@ -23,7 +23,7 @@
  */
 'use strict';
 
-const {exec} = require('node:child_process');
+const {exec} = require('child_process');
 const Q = require('q');
 
 /**
