@@ -24,18 +24,43 @@
 
 'use strict';
 
-const load = require('../../src/npm-utils-factory').getLoad();
+/**
+ * This module is used as a wrapper for NPM commands.
+ * Each functions will returned a promise:
+ *  - Resolved with the desired result.
+ *  - Rejected with the error returned from NPM.
+ */
 
-describe('load', () => {
-  it('should load npm and get meta data', (done) => {
-    load()
-        .then((meta) => {
-          expect(meta).toBeDefined();
-          expect(meta.version).toBeDefined();
-          done();
-        })
-        .catch((err) => {
-          done.fail(err);
-        });
-  });
-});
+const semver = require('semver');
+const {execSync} = require('child_process');
+
+/**
+ * Get the relative path to version specific npm tools
+ *
+ * @return {string} The relative path to version specific npm tools
+ */
+function _getRequirePath() {
+  const version = execSync('npm -v').toString();
+  if (semver.lt(version, '8.0.0')) {
+    return './npm/';
+  }
+  return './npm8_plus/';
+}
+
+module.exports = {
+  get: function() {
+    return require(_getRequirePath() + '/npm-utils');
+  },
+  getCache: function() {
+    return require(_getRequirePath() + '/cache');
+  },
+  getConfig: function() {
+    return require(_getRequirePath() + '/_config');
+  },
+  getLoad: function() {
+    return require(_getRequirePath() + '/_load');
+  },
+  getVersions: function() {
+    return require(_getRequirePath() + '/versions');
+  },
+};

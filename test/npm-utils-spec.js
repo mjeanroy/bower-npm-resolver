@@ -27,7 +27,7 @@
 const fs = require('fs');
 const path = require('path');
 const tmp = require('tmp');
-const npmUtil = require('../src/npm-utils');
+const npmUtil = require('../src/npm-utils-factory').get();
 
 describe('npm-utils', () => {
   let tmpDir;

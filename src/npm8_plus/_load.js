@@ -21,21 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 'use strict';
 
-const load = require('../../src/npm-utils-factory').getLoad();
+const {exec} = require('child_process');
+const Q = require('q');
 
-describe('load', () => {
-  it('should load npm and get meta data', (done) => {
-    load()
-        .then((meta) => {
-          expect(meta).toBeDefined();
-          expect(meta.version).toBeDefined();
-          done();
-        })
-        .catch((err) => {
-          done.fail(err);
+/**
+ * Load NPM and returns a promise resolved with npm meta result.
+ *
+ * @return {Object} A promise, rejected if NPM cannot be loaded.
+ */
+module.exports = function load() {
+  return Q.Promise((resolve, reject) => {
+    exec('npm -v', (err, meta) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({
+          version: meta,
         });
+      }
+    });
   });
-});
+};

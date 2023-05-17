@@ -26,6 +26,7 @@
 
 const requireg = require('requireg');
 const npm = requireg('npm');
+const Q = require('q');
 
 /**
  * Get npm options as a flat object.
@@ -33,18 +34,20 @@ const npm = requireg('npm');
  * @return {Object} NPM Options.
  */
 module.exports = function npmConfig() {
-  // Added with npm >= 7
-  if (npm.flatOptions) {
-    return npm.flatOptions;
-  }
+  return Q.Promise(function(resolve, reject) {
+    if (npm.flatOptions) {
+      resolve(npm.flatOptions);
+      return;
+    }
 
-  const opts = {
-    registry: npm.config.get('registry'),
-  };
+    const opts = {
+      registry: npm.config.get('registry'),
+    };
 
-  npm.config.keys.forEach((k) => {
-    opts[k] = npm.config.get(k);
+    npm.config.keys.forEach((k) => {
+      opts[k] = npm.config.get(k);
+    });
+
+    resolve(opts);
   });
-
-  return opts;
 };

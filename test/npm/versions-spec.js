@@ -24,7 +24,7 @@
 
 'use strict';
 
-const npmVersions = require('../../src/npm/versions');
+const npmVersions = require('../../src/npm-utils-factory').getVersions();
 
 describe('npmVersions', () => {
   it('should get versions of given package', (done) => {
