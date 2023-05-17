@@ -24,8 +24,8 @@
 
 'use strict';
 
-const requireg = require('requireg');
-const npm = requireg('npm');
+const {exec} = require('node:child_process');
+const Q = require('q');
 
 /**
  * Get npm options as a flat object.
@@ -33,18 +33,13 @@ const npm = requireg('npm');
  * @return {Object} NPM Options.
  */
 module.exports = function npmConfig() {
-  // Added with npm >= 7
-  if (npm.flatOptions) {
-    return npm.flatOptions;
-  }
-
-  const opts = {
-    registry: npm.config.get('registry'),
-  };
-
-  npm.config.keys.forEach((k) => {
-    opts[k] = npm.config.get(k);
+  return Q.Promise(function(resolve, reject) {
+    exec('npm config list --json', (err, json) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(JSON.parse(json));
+    });
   });
-
-  return opts;
 };

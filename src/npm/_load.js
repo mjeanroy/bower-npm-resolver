@@ -21,11 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 'use strict';
 
-const requireg = require('requireg');
-const npm = requireg('npm');
+const {exec} = require('node:child_process');
 const Q = require('q');
 
 /**
@@ -35,12 +33,12 @@ const Q = require('q');
  */
 module.exports = function load() {
   return Q.Promise((resolve, reject) => {
-    npm.load((err, meta) => {
+    exec('npm -v', (err, meta) => {
       if (err) {
         reject(err);
       } else {
-        resolve(meta || {
-          version: npm.version,
+        resolve({
+          version: meta,
         });
       }
     });
