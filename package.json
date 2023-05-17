@@ -12,8 +12,7 @@
     "release": "gulp release:minor",
     "release:patch": "gulp release:patch",
     "release:minor": "gulp release:minor",
-    "release:major": "gulp release:major",
-    "install": "gulp build"
+    "release:major": "gulp release:major"
   },
   "repository": {
     "type": "git",
