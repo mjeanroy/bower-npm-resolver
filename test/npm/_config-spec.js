@@ -24,20 +24,21 @@
 
 'use strict';
 
-const requireg = require('requireg');
-const npm = requireg('npm');
-const npmConfig = require('../../src/npm/_config');
+const npmLoad = require('../../src/npm-utils-factory').getLoad();
+const npmConfig = require('../../src/npm-utils-factory').getConfig();
 
 describe('config', () => {
   it('should load npm and get config', (done) => {
-    npm.load((err) => {
-      if (err) {
+    npmLoad().then((version) => {
+      expect(version).toBeDefined();
+      npmConfig().then((config) => {
+        expect(config).toBeDefined();
+        done();
+      }).catch((err) => {
         done.fail(err);
-        return;
-      }
-
-      expect(npmConfig()).toBeDefined();
-      done();
+      });
+    }).catch((err) => {
+      done.fail(err);
     });
   });
 });

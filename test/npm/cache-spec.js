@@ -24,7 +24,7 @@
 
 'use strict';
 
-const npmCache = require('../../src/npm/cache');
+const npmCache = require('../../src/npm-utils-factory').getCache();
 
 describe('npmCache', () => {
   it('should get cached package', (done) => {
