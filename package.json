@@ -37,7 +37,7 @@
     "cacache": "15.2.0",
     "escape-string-regexp": "4.0.0",
     "fs-write-stream-atomic": "1.0.10",
-    "lodash": "4.17.21",
+    "lodash": "4.18.1",
     "mkdirp": "0.5.1",
     "packument": "1.0.0",
     "pacote": "11.3.1",
